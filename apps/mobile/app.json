@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Klikeo",
+    "slug": "klikeo",
+    "version": "1.0.0",
+    "scheme": "klikeo",
+    "platforms": ["ios", "android"],
+    "assetBundlePatterns": ["**/*"]
+  }
+}

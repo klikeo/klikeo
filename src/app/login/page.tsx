@@ -30,7 +30,7 @@ function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data.email, data.password)
-      router.push("/???")
+      router.push("/dashboard")
     } catch (err) {
       setError("root", {
         message: err instanceof Error ? err.message : "Error al iniciar sesión",

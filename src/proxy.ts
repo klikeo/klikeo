@@ -12,9 +12,9 @@ export function proxy(request: NextRequest) {
   if (!refreshToken) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
-    console.log('====================================');
+    console.log('=loginUrl===================================');
     console.log(loginUrl);
-    console.log('====================================');
+    console.log('=refreshToken===================================');
     console.log(refreshToken);
     return NextResponse.redirect(loginUrl)
   }

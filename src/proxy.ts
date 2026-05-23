@@ -9,10 +9,14 @@ export function proxy(request: NextRequest) {
   if (!isProtected) return NextResponse.next()
 
   const refreshToken = request.cookies.get('refreshToken')
+  console.log('==============request.cookies======================');
+  console.log(request.cookies);
+  console.log('====================================');
   if (!refreshToken) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+    // return NextResponse.redirect(loginUrl)
+    return NextResponse.redirect("/???")
   }
 
   return NextResponse.next()

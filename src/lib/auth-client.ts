@@ -40,9 +40,7 @@ export async function loginUser(data: {
   })
   const json = await res.json()
   if (!res.ok) throw new Error(json.error ?? "Credenciales inválidas")
-  console.log("=json===================================")
-  console.log(json)
-  console.log("====================================")
+
   return json
 }
 

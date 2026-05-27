@@ -203,7 +203,7 @@ export default function MiNegocioPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-primary text-white border-none rounded-lg text-base font-semibold disabled:opacity-50 min-h-[44px] hover:bg-primary-dark transition-colors"
+              className="w-full py-3 bg-primary text-white border-none rounded-lg text-base font-semibold disabled:opacity-50 min-h-44px hover:bg-primary-dark transition-colors"
             >
               {isSubmitting
                 ? "Guardando..."

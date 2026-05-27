@@ -21,13 +21,13 @@ export default function LandingPage() {
           <div className="flex gap-4 justify-center flex-wrap">
             <Link
               href="/register"
-              className="bg-primary text-white px-7 py-3.5 rounded-lg no-underline text-base font-semibold min-h-[44px] inline-flex items-center hover:bg-primary-dark transition-colors"
+              className="bg-primary text-white px-7 py-3.5 rounded-lg no-underline text-base font-semibold min-h-44px inline-flex items-center hover:bg-primary-dark transition-colors"
             >
               Registrar mi negocio gratis
             </Link>
             <Link
               href="/negocios"
-              className="bg-surface text-primary px-7 py-3.5 rounded-lg no-underline text-base font-semibold border border-primary min-h-[44px] inline-flex items-center hover:bg-primary/5 transition-colors"
+              className="bg-surface text-primary px-7 py-3.5 rounded-lg no-underline text-base font-semibold border border-primary min-h-44px inline-flex items-center hover:bg-primary/5 transition-colors"
             >
               Explorar negocios
             </Link>

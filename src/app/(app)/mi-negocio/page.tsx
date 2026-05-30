@@ -69,7 +69,11 @@ export default function MiNegocioPage() {
           phone: n.phone,
         })
       })
-      .catch(() => setFetchError(""))
+      .catch((error) => {
+        if (error instanceof Error && error.message !== 'No tienes un negocio registrado') {
+          setFetchError(error.message)
+        }
+      })
   }, [token, reset])
 
   const onSubmit = async (data: NegocioForm) => {

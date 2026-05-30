@@ -46,13 +46,7 @@ export interface ChatSessionItem {
 export const dashboardClient = {
   negocios: {
     getByOwner(token: string): Promise<NegocioDashboard> {
-      // Uses GET /api/negocios with auth to find owner's negocio
-      // We'll use the list endpoint and return first owned negocio
-      return authFetch('/api/negocios', { token, method: 'GET' }).then((res) => {
-        const r = res as { data: NegocioDashboard[] }
-        if (!r.data?.length) throw new Error('No tienes un negocio registrado')
-        return r.data[0]
-      })
+      return authFetch('/api/negocios/me', { token, method: 'GET' })
     },
     getById(id: string, token: string): Promise<NegocioDashboard> {
       return authFetch(`/api/negocios/${id}`, { token, method: 'GET' })

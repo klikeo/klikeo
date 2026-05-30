@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState } from "react"
+import Link from "next/link"
 
-import { useAuth } from "@/src/lib/auth-context";
+import { useAuth } from "@/src/lib/auth-context"
 
 interface NavbarProps {
-  isAdmin?: boolean;
+  isAdmin?: boolean
 }
 
 export default function Navbar({ isAdmin = false }: NavbarProps) {
-  const { user, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth()
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleLogout = async () => {
-    await logout();
-    setIsOpen(false);
-  };
+    await logout()
+    setIsOpen(false)
+  }
 
   const navLinks = user
     ? [
@@ -31,9 +31,6 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
         { href: "/negocios", label: "Explorar" },
         { href: "/politicas-de-privacidad", label: "Políticas" },
       ]
-
-      ]
-    : [{ href: "/negocios", label: "Explorar" }];
 
   return (
     <>
@@ -205,5 +202,5 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
         }
       `}</style>
     </>
-  );
+  )
 }

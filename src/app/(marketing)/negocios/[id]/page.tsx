@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { apiClient } from '@/src/lib/api-client'
-import WhatsAppButton from '@/src/components/WhatsAppButton'
+import BusinessChatBubble from '@/src/components/BusinessChatBubble'
 
 interface NegocioPageProps {
   params: Promise<{ id: string }>
@@ -96,12 +96,17 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
 
         <div className="bg-surface border border-border rounded-xl p-8 text-center">
           <h2 className="text-xl font-semibold text-text mb-3">
-            ¿Quieres contactar a {negocio.name}?
+            Chatea con el asistente virtual de {negocio.name}
           </h2>
           <p className="text-muted text-sm mb-6">
-            Chatea directamente con el asistente virtual en WhatsApp — disponible 24/7.
+            Conversa aquí mismo con el chat entrenado específicamente para este negocio.
           </p>
-          <WhatsAppButton whatsappNumber={negocio.whatsappNumber} negocioName={negocio.name} />
+          <p className="text-sm text-muted mb-4">
+            El asistente usa la información que el negocio ha entrenado en DeepSeek para responder tus preguntas.
+          </p>
+          <div className="flex justify-center">
+            <BusinessChatBubble negocioId={negocio.id} negocioName={negocio.name} />
+          </div>
         </div>
       </div>
     </div>

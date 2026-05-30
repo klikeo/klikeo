@@ -44,6 +44,11 @@ export interface AuthResponse {
   accessToken: string
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 // Auth state management
 let accessToken: string | null = null
 
@@ -167,6 +172,14 @@ export const apiClient = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trainingData }),
+      })
+    },
+
+    chat(id: string, messages: ChatMessage[]): Promise<{ reply: string }> {
+      return apiFetch<{ reply: string }>(`/api/negocios/${id}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
       })
     },
   },

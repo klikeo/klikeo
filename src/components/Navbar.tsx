@@ -25,6 +25,13 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
         { href: "/chats", label: "Chats" },
         { href: "/chatbot", label: "Chatbot" },
         ...(isAdmin ? [{ href: "/admin/users", label: "Usuarios" }] : []),
+        { href: "/politicas-de-privacidad", label: "Políticas" },
+      ]
+    : [
+        { href: "/negocios", label: "Explorar" },
+        { href: "/politicas-de-privacidad", label: "Políticas" },
+      ]
+
       ]
     : [{ href: "/negocios", label: "Explorar" }];
 

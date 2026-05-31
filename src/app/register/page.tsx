@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -44,6 +46,9 @@ function FieldError({ message }: { message?: string }) {
 export default function RegisterPage() {
   const { register: registerAuth } = useAuth()
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -116,12 +121,21 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium mb-1.5 text-text">
                 Contraseña
               </label>
-              <input
-                {...register("password")}
-                type="password"
-                autoComplete="new-password"
-                className={`${inputBaseClass} ${errors.password ? "border-destructive" : ""}`}
-              />
+              <div className="relative">
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  className={`${inputBaseClass} ${errors.password ? "border-destructive" : ""}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               <FieldError message={errors.password?.message} />
             </div>
 
@@ -129,12 +143,21 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium mb-1.5 text-text">
                 Confirmar contraseña
               </label>
-              <input
-                {...register("confirmPassword")}
-                type="password"
-                autoComplete="new-password"
-                className={`${inputBaseClass} ${errors.confirmPassword ? "border-destructive" : ""}`}
-              />
+              <div className="relative">
+                <input
+                  {...register("confirmPassword")}
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  className={`${inputBaseClass} ${errors.confirmPassword ? "border-destructive" : ""}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               <FieldError message={errors.confirmPassword?.message} />
             </div>
 

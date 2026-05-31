@@ -1,5 +1,6 @@
 "use client"
-
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -19,6 +20,7 @@ type LoginForm = z.infer<typeof loginSchema>
 function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -76,12 +78,21 @@ function LoginForm() {
             <label className="block text-sm font-medium mb-1.5 text-text">
               Contraseña
             </label>
-            <input
-              {...register("password")}
-              type="password"
-              autoComplete="current-password"
-              className="w-full px-3.5 py-2.5 border rounded-lg text-sm outline-none bg-surface text-text border-border focus:border-primary"
-            />
+            <div className="relative">
+              <input
+                {...register("password")}
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                className="w-full px-3.5 py-2.5 border rounded-lg text-sm outline-none bg-surface text-text border-border focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-destructive text-xs mt-1">
                 {errors.password.message}

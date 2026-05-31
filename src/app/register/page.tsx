@@ -14,7 +14,19 @@ const registerSchema = z
     email: z.string().email("Email inválido"),
     password: z
       .string()
-      .min(8, "La contraseña debe tener al menos 8 caracteres"),
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
+      .refine((val) => /[A-Z]/.test(val), {
+        message: "Debe contener al menos una letra mayúscula",
+      })
+      .refine((val) => /[a-z]/.test(val), {
+        message: "Debe contener al menos una letra minúscula",
+      })
+      .refine((val) => /[0-9]/.test(val), {
+        message: "Debe contener al menos un número",
+      })
+      .refine((val) => /[^A-Za-z0-9]/.test(val), {
+        message: "Debe contener al menos un carácter especial (!@#$%...)",
+      }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

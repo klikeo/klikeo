@@ -1,7 +1,7 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { apiClient } from '@/src/lib/api-client'
-import BusinessChatBubble from '@/src/components/BusinessChatBubble'
+import { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { apiClient } from "@/src/lib/api-client"
+import BusinessChatBubble from "@/src/components/BusinessChatBubble"
 
 interface NegocioPageProps {
   params: Promise<{ id: string }>
@@ -9,7 +9,9 @@ interface NegocioPageProps {
 
 export const revalidate = 3600
 
-export async function generateMetadata({ params }: NegocioPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: NegocioPageProps): Promise<Metadata> {
   const { id } = await params
   try {
     const negocio = await apiClient.negocios.getById(id)
@@ -18,26 +20,8 @@ export async function generateMetadata({ params }: NegocioPageProps): Promise<Me
       description: negocio.description ?? `${negocio.name} en ${negocio.city}`,
     }
   } catch {
-    return { title: 'Negocio — Klikeo' }
+    return { title: "Negocio — Klikeo" }
   }
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  alimentos: 'Alimentos',
-  ropa: 'Ropa',
-  salud: 'Salud',
-  servicios: 'Servicios',
-  tecnologia: 'Tecnología',
-  educacion: 'Educación',
-  belleza: 'Belleza',
-  hogar: 'Hogar',
-  deportes: 'Deportes',
-  entretenimiento: 'Entretenimiento',
-  transporte: 'Transporte',
-  turismo: 'Turismo',
-  mascotas: 'Mascotas',
-  construccion: 'Construcción',
-  otros: 'Otros',
 }
 
 export default async function NegocioDetailPage({ params }: NegocioPageProps) {
@@ -71,8 +55,8 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
               </h1>
               <div className="flex gap-3 flex-wrap items-center">
                 <span className="text-muted text-sm">📍 {negocio.city}</span>
-                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-medium">
-                  {CATEGORY_LABELS[negocio.category] ?? negocio.category}
+                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-medium capitalize">
+                  {negocio.category}
                 </span>
               </div>
             </div>
@@ -94,19 +78,11 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-xl p-8 text-center">
-          <h2 className="text-xl font-semibold text-text mb-3">
-            Chatea con el asistente virtual de {negocio.name}
-          </h2>
-          <p className="text-muted text-sm mb-6">
-            Conversa aquí mismo con el chat entrenado específicamente para este negocio.
-          </p>
-          <p className="text-sm text-muted mb-4">
-            El asistente usa la información que el negocio ha entrenado en DeepSeek para responder tus preguntas.
-          </p>
-          <div className="flex justify-center">
-            <BusinessChatBubble negocioId={negocio.id} negocioName={negocio.name} />
-          </div>
+          <BusinessChatBubble
+            negocioId={negocio.id}
+            negocioName={negocio.name}
+          />
+        <div className="flex justify-center">
         </div>
       </div>
     </div>

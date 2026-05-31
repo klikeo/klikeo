@@ -49,7 +49,7 @@ export default function BusinessChatBubble({
 
   return (
     <div
-      className={`fixed bottom-4 right-4 w-full ${open ? "max-w-[520px]" : "max-w-[60px]"} text-left`}
+      className={`fixed bottom-4 right-4 md:w-full ${open ? "max-w-[520px]" : "max-w-[60px]"} text-left`}
     >
       <div
         className={`bg-surface border border-border shadow-lg overflow-hidden ${open ? "rounded-3xl" : "rounded-full"}`}
@@ -58,12 +58,7 @@ export default function BusinessChatBubble({
           className={`flex items-center ${open ? "justify-between px-4 py-4" : "justify-center px-1 py-1"} bg-primary text-white`}
         >
           {open && (
-            <div>
-              <p className="text-sm font-semibold">Chat con {negocioName}</p>
-              {/* <p className="text-xs text-white/80">
-                Asistente entrenado
-              </p> */}
-            </div>
+            <p className="text-sm font-semibold">Chat con {negocioName}</p>
           )}
           <button
             type="button"
@@ -88,7 +83,7 @@ export default function BusinessChatBubble({
                     className={`p-3 text-sm w-fit max-w-[90%] ${
                       message.role === "user"
                         ? "rounded-t-2xl rounded-bl-2xl ml-auto bg-primary text-white"
-                        : "rounded-t-2xl rounded-br-2xl mr-auto bg-gray-100 text-text"
+                        : "rounded-t-2xl rounded-br-2xl mr-auto bg-gray-100 text-teal-950"
                     }`}
                   >
                     {message.content}
@@ -108,7 +103,7 @@ export default function BusinessChatBubble({
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder="Escribe tu pregunta..."
-                className="flex-1 rounded-2xl border border-border px-4 py-3 text-sm bg-white text-text outline-none focus:border-primary"
+                className="flex-1 rounded-2xl border border-border px-4 py-3 text-sm bg-white text-teal-950 outline-none focus:border-primary"
                 disabled={isSending}
               />
               <button

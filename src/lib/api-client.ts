@@ -12,6 +12,7 @@ export interface NegocioPublic {
   phone?: string
   whatsappNumber: string
   logoUrl?: string
+  bannerUrl?: string
   isActive: boolean
   createdAt: string
   updatedAt: string

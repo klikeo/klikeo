@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -44,6 +44,14 @@ export default function MiNegocioPage() {
   const { token, loading } = useRequireAuth()
   const [negocio, setNegocio] = useState<NegocioDashboard | null>(null)
   const [success, setSuccess] = useState("")
+  const [assetMessage, setAssetMessage] = useState("")
+  const [assetError, setAssetError] = useState("")
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false)
   const [fetchError, setFetchError] = useState("")
 
   const {
@@ -97,6 +105,85 @@ export default function MiNegocioPage() {
       setError("root", {
         message: err instanceof Error ? err.message : "Error al guardar",
       })
+    }
+  }
+
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    setFile: Dispatch<SetStateAction<File | null>>,
+    setPreview: Dispatch<SetStateAction<string | null>>,
+  ) => {
+    const file = event.target.files?.[0] ?? null
+    if (!file) {
+      setFile(null)
+      setPreview(null)
+      return
+    }
+
+    setFile(file)
+    setPreview(URL.createObjectURL(file))
+  }
+
+  const handleAssetUpload = async (type: 'logo' | 'banner') => {
+    if (!token || !negocio) return
+
+    const file = type === 'logo' ? logoFile : bannerFile
+    if (!file) {
+      setAssetError('Selecciona una imagen primero')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append(type, file)
+
+    try {
+      if (type === 'logo') setIsUploadingLogo(true)
+      if (type === 'banner') setIsUploadingBanner(true)
+      setAssetError("")
+      const updated = await dashboardClient.negocios.uploadAssets(
+        negocio.id,
+        formData,
+        token,
+      )
+      setNegocio(updated)
+      setAssetMessage(`Imagen de ${type} subida correctamente`)
+      setTimeout(() => setAssetMessage(""), 3000)
+      if (type === 'logo') {
+        setLogoFile(null)
+        setLogoPreview(null)
+      } else {
+        setBannerFile(null)
+        setBannerPreview(null)
+      }
+    } catch (err) {
+      setAssetError(err instanceof Error ? err.message : 'Error al subir imagen')
+    } finally {
+      setIsUploadingLogo(false)
+      setIsUploadingBanner(false)
+    }
+  }
+
+  const handleRemoveAsset = async (type: 'logo' | 'banner') => {
+    if (!token || !negocio) return
+
+    try {
+      setAssetError("")
+      const updated =
+        type === 'logo'
+          ? await dashboardClient.negocios.deleteLogo(negocio.id, token)
+          : await dashboardClient.negocios.deleteBanner(negocio.id, token)
+      setNegocio(updated)
+      setAssetMessage(`Imagen de ${type} eliminada correctamente`)
+      setTimeout(() => setAssetMessage(""), 3000)
+      if (type === 'logo') {
+        setLogoFile(null)
+        setLogoPreview(null)
+      } else {
+        setBannerFile(null)
+        setBannerPreview(null)
+      }
+    } catch (err) {
+      setAssetError(err instanceof Error ? err.message : 'Error al eliminar imagen')
     }
   }
 
@@ -229,6 +316,137 @@ export default function MiNegocioPage() {
             </button>
           </form>
         </div>
+
+        <div className="bg-surface border border-border rounded-xl p-8 mt-6">
+          <h2 className="text-lg font-semibold text-text mb-4">Identidad visual</h2>
+          <p className="text-sm text-muted mb-4">
+            Sube tu logo y banner para que tu negocio se vea profesional en la página pública.
+          </p>
+
+          {assetMessage && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-green-700 text-sm">
+              {assetMessage}
+            </div>
+          )}
+          {assetError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-red-700 text-sm">
+              {assetError}
+            </div>
+          )}
+
+          <div className="grid gap-5">
+            <div className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-4 mb-4 flex-wrap">
+                <div className="w-20 h-20 rounded-xl overflow-hidden bg-surface border border-border">
+                  {logoPreview ? (
+                    <img
+                      src={logoPreview}
+                      alt="Vista previa del logo"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : negocio?.logoUrl ? (
+                    <img
+                      src={negocio.logoUrl}
+                      alt="Logo actual"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted text-sm">
+                      Logo
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text">Logo</p>
+                  <p className="text-sm text-muted">Preferido: 1:1, PNG o JPG.</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label className="block w-full sm:w-auto">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setLogoFile, setLogoPreview)}
+                    className="block w-full text-sm text-text"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={isUploadingLogo}
+                  onClick={() => handleAssetUpload('logo')}
+                  className="py-2 px-4 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+                >
+                  {isUploadingLogo ? 'Subiendo...' : 'Subir logo'}
+                </button>
+                {negocio?.logoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAsset('logo')}
+                    className="py-2 px-4 bg-destructive text-white rounded-lg text-sm font-semibold"
+                  >
+                    Eliminar logo
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-4 mb-4 flex-wrap">
+                <div className="w-full h-32 rounded-xl overflow-hidden bg-surface border border-border">
+                  {bannerPreview ? (
+                    <img
+                      src={bannerPreview}
+                      alt="Vista previa del banner"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : negocio?.bannerUrl ? (
+                    <img
+                      src={negocio.bannerUrl}
+                      alt="Banner actual"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted text-sm">
+                      Banner
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-text">Banner</p>
+                  <p className="text-sm text-muted">Preferido: 16:9 o similar, PNG o JPG.</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label className="block w-full sm:w-auto">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setBannerFile, setBannerPreview)}
+                    className="block w-full text-sm text-text"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={isUploadingBanner}
+                  onClick={() => handleAssetUpload('banner')}
+                  className="py-2 px-4 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+                >
+                  {isUploadingBanner ? 'Subiendo...' : 'Subir banner'}
+                </button>
+                {negocio?.bannerUrl && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAsset('banner')}
+                    className="py-2 px-4 bg-destructive text-white rounded-lg text-sm font-semibold"
+                  >
+                    Eliminar banner
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {fetchError && <p className="text-muted text-sm mt-4">{fetchError}</p>}
       </div>
     </div>

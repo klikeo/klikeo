@@ -6,15 +6,21 @@ interface FetchOptions extends RequestInit {
 
 async function authFetch<T>(path: string, options: FetchOptions): Promise<T> {
   const { token, ...rest } = options
+  const headers: HeadersInit = {
+    Authorization: `Bearer ${token}`,
+    ...rest.headers,
+  }
+
+  if (!(rest.body instanceof FormData)) {
+    ;(headers as Record<string, string>)['Content-Type'] = 'application/json'
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...rest.headers,
-    },
+    headers,
     credentials: 'include',
   })
+
   const json = await res.json()
   if (!res.ok) throw new Error((json as { error: string }).error ?? 'Error de API')
   return json as T
@@ -31,6 +37,7 @@ export interface NegocioDashboard {
   whatsappNumber: string
   address?: string
   logoUrl?: string
+  bannerUrl?: string
   trainingData?: string
   isActive: boolean
 }
@@ -57,6 +64,15 @@ export const dashboardClient = {
     },
     create(data: Omit<NegocioDashboard, 'id' | 'isActive'>, token: string): Promise<NegocioDashboard> {
       return authFetch('/api/negocios', { token, method: 'POST', body: JSON.stringify(data) })
+    },
+    uploadAssets(id: string, formData: FormData, token: string): Promise<NegocioDashboard> {
+      return authFetch(`/api/negocios/${id}/assets`, { token, method: 'POST', body: formData })
+    },
+    deleteLogo(id: string, token: string): Promise<NegocioDashboard> {
+      return authFetch(`/api/negocios/${id}/logo`, { token, method: 'DELETE' })
+    },
+    deleteBanner(id: string, token: string): Promise<NegocioDashboard> {
+      return authFetch(`/api/negocios/${id}/banner`, { token, method: 'DELETE' })
     },
     trainChatbot(id: string, trainingData: string, token: string): Promise<{ message: string }> {
       return authFetch(`/api/negocios/${id}/chat/entrenar`, {

@@ -36,6 +36,15 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto py-10 px-6">
+        {negocio.bannerUrl && (
+          <div className="mb-6 overflow-hidden rounded-3xl border border-border">
+            <img
+              src={negocio.bannerUrl}
+              alt={`${negocio.name} banner`}
+              className="w-full h-60 object-cover"
+            />
+          </div>
+        )}
         <div className="bg-surface border border-border rounded-xl p-8 mb-6">
           <div className="flex items-center gap-5 mb-5 flex-wrap">
             {negocio.logoUrl ? (

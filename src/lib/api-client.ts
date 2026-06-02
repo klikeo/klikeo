@@ -3,6 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 // Types
 export interface NegocioPublic {
   id: string
+  slug?: string
   name: string
   description?: string
   category: string

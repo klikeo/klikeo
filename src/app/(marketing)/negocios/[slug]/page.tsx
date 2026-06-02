@@ -4,7 +4,7 @@ import { apiClient } from "@/src/lib/api-client"
 import BusinessChatBubble from "@/src/components/BusinessChatBubble"
 
 interface NegocioPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export const revalidate = 3600
@@ -12,9 +12,9 @@ export const revalidate = 3600
 export async function generateMetadata({
   params,
 }: NegocioPageProps): Promise<Metadata> {
-  const { id } = await params
+  const { slug } = await params
   try {
-    const negocio = await apiClient.negocios.getById(id)
+    const negocio = await apiClient.negocios.getById(slug)
     return {
       title: `${negocio.name} — Klikeo`,
       description: negocio.description ?? `${negocio.name} en ${negocio.city}`,
@@ -25,10 +25,10 @@ export async function generateMetadata({
 }
 
 export default async function NegocioDetailPage({ params }: NegocioPageProps) {
-  const { id } = await params
+  const { slug } = await params
   let negocio
   try {
-    negocio = await apiClient.negocios.getById(id)
+    negocio = await apiClient.negocios.getById(slug)
   } catch {
     notFound()
   }

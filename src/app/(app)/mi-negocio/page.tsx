@@ -11,6 +11,7 @@ import { dashboardClient, NegocioDashboard } from "@/src/lib/dashboard-client"
 
 const negocioSchema = z.object({
   name: z.string().min(2, "Mínimo 2 caracteres"),
+  slug: z.string().trim().optional(),
   description: z.string().max(500, "Máximo 500 caracteres").optional(),
   category: z.string().min(1, "Selecciona una categoría"),
   city: z.string().min(1, "La ciudad es requerida"),
@@ -61,6 +62,7 @@ export default function MiNegocioPage() {
         setNegocio(n)
         reset({
           name: n.name,
+          slug: n.slug,
           description: n.description,
           category: n.category,
           city: n.city,
@@ -131,6 +133,11 @@ export default function MiNegocioPage() {
                 label: "Nombre del negocio *",
                 type: "text",
               },
+              {
+                field: "slug" as const,
+                label: "Slug público (opcional)",
+                type: "text",
+              },
               { field: "city" as const, label: "Ciudad *", type: "text" },
               {
                 field: "whatsappNumber" as const,
@@ -157,6 +164,11 @@ export default function MiNegocioPage() {
                   type={type}
                   className={`w-full px-3.5 py-2.5 border rounded-lg text-sm bg-surface text-text border-border focus:border-primary outline-none ${errors[field] ? "border-destructive" : ""}`}
                 />
+                {field === 'slug' && (
+                  <p className="text-muted text-xs mt-1">
+                    Dejar en blanco para generar el slug automáticamente desde el nombre.
+                  </p>
+                )}
                 {errors[field] && (
                   <p className="text-destructive text-xs mt-1">
                     {errors[field]?.message}

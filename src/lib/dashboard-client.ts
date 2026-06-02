@@ -22,6 +22,7 @@ async function authFetch<T>(path: string, options: FetchOptions): Promise<T> {
 
 export interface NegocioDashboard {
   id: string
+  slug?: string
   name: string
   description?: string
   category: string

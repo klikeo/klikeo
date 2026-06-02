@@ -27,7 +27,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function NegocioCard({ negocio }: NegocioCardProps) {
   return (
-    <Link href={`/negocios/${negocio.id}`} className="no-underline text-inherit">
+    <Link href={`/negocios/${negocio.slug ?? negocio.id}`} className="no-underline text-inherit">
       <div className="bg-surface border border-border rounded-xl p-5 transition-shadow cursor-pointer h-full hover:shadow-lg">
         <div className="flex items-start gap-3">
           {negocio.logoUrl ? (

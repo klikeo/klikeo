@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react"
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -318,6 +319,22 @@ export default function MiNegocioPage() {
         </div>
 
         <div className="bg-surface border border-border rounded-xl p-8 mt-6">
+          {negocio && (
+            <div className="mb-6 rounded-3xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Catálogo</p>
+                  <p className="mt-2 text-sm text-muted">Accede directamente al catálogo de productos de tu negocio.</p>
+                </div>
+                <Link
+                  href="/mi-negocio/productos"
+                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
+                >
+                  Ver productos
+                </Link>
+              </div>
+            </div>
+          )}
           <h2 className="text-lg font-semibold text-text mb-4">Identidad visual</h2>
           <p className="text-sm text-muted mb-4">
             Sube tu logo y banner para que tu negocio se vea profesional en la página pública.

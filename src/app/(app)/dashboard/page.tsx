@@ -78,6 +78,7 @@ function OwnerDashboard({ token }: { token: string }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { href: '/mi-negocio', label: 'Editar negocio', desc: 'Actualiza tu perfil público' },
+          { href: '/mi-negocio/productos', label: 'Productos', desc: 'Administra el catálogo de tu negocio' },
           { href: '/chatbot', label: 'Entrenar chatbot', desc: 'Enseña a tu asistente virtual' },
           { href: '/chats', label: 'Ver conversaciones', desc: 'Historial de chats de WhatsApp' },
         ].map((link) => (

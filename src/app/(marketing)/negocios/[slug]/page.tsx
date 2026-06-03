@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { apiClient } from "@/src/lib/api-client"
 import BusinessChatBubble from "@/src/components/BusinessChatBubble"
+import NegocioCategoriesSpy from "@/src/components/NegocioCategoriesSpy"
 
 interface NegocioPageProps {
   params: Promise<{ slug: string }>
@@ -54,7 +55,7 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
                 className="w-20 h-20 rounded-xl object-cover"
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-primary text-white flex items-center justify-center text-3xl font-bold flex-shrink-0">
+              <div className="w-20 h-20 rounded-xl bg-primary text-white flex items-center justify-center text-3xl font-bold shrink-0">
                 {negocio.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -87,11 +88,13 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
           </div>
         </div>
 
+        <NegocioCategoriesSpy />
+
+        <div className="mt-8">
           <BusinessChatBubble
             negocioId={negocio.id}
             negocioName={negocio.name}
           />
-        <div className="flex justify-center">
         </div>
       </div>
     </div>

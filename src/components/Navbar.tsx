@@ -21,6 +21,7 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
   const navLinks = user
     ? [
         { href: "/dashboard", label: "Dashboard" },
+        { href: "/mi-negocio/productos", label: "Productos" },
         { href: "/mi-negocio", label: "Mi Negocio" },
         { href: "/chats", label: "Chats" },
         { href: "/chatbot", label: "Chatbot" },

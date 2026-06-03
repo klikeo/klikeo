@@ -33,6 +33,36 @@ export interface ListNegociosParams {
   limit?: number
 }
 
+export interface ProductCategoryPublic {
+  id: string
+  name: string
+  isActive: boolean
+}
+
+export interface ProductPublic {
+  id: string
+  name: string
+  description?: string
+  category: string
+  price: number
+  imageUrl?: string
+  isActive: boolean
+}
+
+export interface ListProductCategoriesResponse {
+  data: ProductCategoryPublic[]
+  total: number
+  page: number
+  totalPages: number
+}
+
+export interface ListProductsResponse {
+  data: ProductPublic[]
+  total: number
+  page: number
+  totalPages: number
+}
+
 export interface User {
   id: string
   email: string
@@ -141,6 +171,18 @@ export const apiClient = {
 
     getById(id: string): Promise<NegocioPublic> {
       return apiFetch<NegocioPublic>(`/api/negocios/${id}`, {
+        next: { revalidate: 3600 },
+      })
+    },
+
+    getCategories(id: string): Promise<ListProductCategoriesResponse> {
+      return apiFetch<ListProductCategoriesResponse>(`/api/negocios/${id}/categorias/public`, {
+        next: { revalidate: 3600 },
+      })
+    },
+
+    getProducts(id: string): Promise<ListProductsResponse> {
+      return apiFetch<ListProductsResponse>(`/api/negocios/${id}/productos/public`, {
         next: { revalidate: 3600 },
       })
     },

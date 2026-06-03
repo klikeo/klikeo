@@ -88,7 +88,7 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
           </div>
         </div>
 
-        <NegocioCategoriesSpy />
+        <NegocioCategoriesSpy businessSlug={slug} />
 
         <div className="mt-8">
           <BusinessChatBubble

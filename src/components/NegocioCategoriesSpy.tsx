@@ -1,63 +1,67 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { apiClient, ProductCategoryPublic, ProductPublic } from '@/src/lib/api-client'
 
-const categorySections = [
-  {
-    id: 'hamburguesas',
-    title: 'Hamburguesas',
-    subtitle: 'Clásicas, gourmet y combos',
-    description:
-      'Prueba nuestras hamburguesas más vendidas con pan artesanal, queso fundido y vegetales frescos.',
-    cards: [
-      { name: 'Hamburguesa Beef', detail: 'Carne 100% vacuno, cheddar y salsa especial.' },
-      { name: 'Hamburguesa Pollo Crispy', detail: 'Pechuga empanizada con lechuga y mayonesa de la casa.' },
-      { name: 'Hamburguesa Veggie', detail: 'Beyond Meat, queso vegano y alioli de ajo.' },
-    ],
-  },
-  {
-    id: 'hotdogs',
-    title: 'Hot Dogs',
-    subtitle: 'Sencillos, dobles y premium',
-    description:
-      'Nuestra selección de hot dogs incluye opciones clásicas y combinaciones de sabores explosivos.',
-    cards: [
-      { name: 'Hot Dog Clásico', detail: 'Salchicha alemana, kétchup, mostaza y papitas fritas.' },
-      { name: 'Hot Dog Bacon', detail: 'Con bacon crujiente, cebolla caramelizada y chimichurri.' },
-      { name: 'Hot Dog Especial', detail: 'Queso fundido, pepinillos y salsa casera.' },
-    ],
-  },
-  {
-    id: 'bebidas',
-    title: 'Bebidas',
-    subtitle: 'Refrescos, jugos y cocteles',
-    description:
-      'Acompaña tu orden con bebidas frías, jugos naturales o cocteles preparados para compartir.',
-    cards: [
-      { name: 'Limonada Casera', detail: 'Natural con hierbabuena.' },
-      { name: 'Malteada de Vainilla', detail: 'Cremosa y dulce con topping de oreo.' },
-      { name: 'Gaseosa 500ml', detail: 'Variedad de marcas disponibles.' },
-    ],
-  },
-  {
-    id: 'postres',
-    title: 'Postres',
-    subtitle: 'Dulces para el final',
-    description:
-      'Cierra con lo mejor: brownies, helados y postres rápidos listos para compartir.',
-    cards: [
-      { name: 'Brownie Chocolate', detail: 'Con helado de vainilla y salsa de caramelo.' },
-      { name: 'Helado Artesanal', detail: 'Sabores del día.' },
-      { name: 'Churros', detail: 'Rellenos de chocolate o dulce de leche.' },
-    ],
-  },
-]
+interface NegocioCategoriesSpyProps {
+  businessSlug: string
+}
 
-export default function NegocioCategoriesSpy() {
-  const [activeSection, setActiveSection] = useState(categorySections[0].id)
+interface CategorySection {
+  id: string
+  name: string
+  products: ProductPublic[]
+}
+
+export default function NegocioCategoriesSpy({ businessSlug }: NegocioCategoriesSpyProps) {
+  const [categories, setCategories] = useState<ProductCategoryPublic[]>([])
+  const [products, setProducts] = useState<ProductPublic[]>([])
+  const [activeSection, setActiveSection] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const sectionRefs = useRef<Array<HTMLElement | null>>([])
   const rootRef = useRef<HTMLDivElement | null>(null)
   const categoriesNavRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const fetchMenu = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const [categoriesResult, productsResult] = await Promise.all([
+          apiClient.negocios.getCategories(businessSlug),
+          apiClient.negocios.getProducts(businessSlug),
+        ])
+        setCategories(categoriesResult.data)
+        setProducts(productsResult.data)
+        setActiveSection(categoriesResult.data[0]?.id ?? '')
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'No se pudo cargar el menú del negocio'
+        setError(message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (businessSlug) {
+      fetchMenu()
+    }
+  }, [businessSlug])
+
+  const filteredProducts = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    if (!query) return products
+    return products.filter((product) => product.name.toLowerCase().includes(query) || product.description?.toLowerCase().includes(query))
+  }, [products, searchTerm])
+
+  const sections = useMemo<CategorySection[]>(() => {
+    return categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      products: filteredProducts.filter((product) => product.category === category.name),
+    }))
+  }, [categories, filteredProducts])
 
   const centerActiveTab = (id: string) => {
     const button = document.getElementById(`category-tab-${id}`)
@@ -92,6 +96,8 @@ export default function NegocioCategoriesSpy() {
   }
 
   useEffect(() => {
+    if (!sections.length) return
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -106,7 +112,7 @@ export default function NegocioCategoriesSpy() {
         root: rootRef.current,
         rootMargin: '-30% 0px -55% 0px',
         threshold: 0.25,
-      }
+      },
     )
 
     sectionRefs.current.forEach((section) => {
@@ -122,34 +128,64 @@ export default function NegocioCategoriesSpy() {
       observer.disconnect()
       container?.removeEventListener('scroll', handleScroll)
     }
-  }, [])
+  }, [sections, activeSection])
 
   useEffect(() => {
-    centerActiveTab(activeSection)
+    if (activeSection) {
+      centerActiveTab(activeSection)
+    }
   }, [activeSection])
+
+  if (loading) {
+    return (
+      <div className="rounded-3xl border border-border bg-surface p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 rounded-2xl bg-background" />
+          <div className="h-10 rounded-2xl bg-background" />
+          <div className="h-72 rounded-3xl bg-background" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-900 shadow-sm">
+        {error}
+      </div>
+    )
+  }
+
+  if (sections.length === 0) {
+    return (
+      <div className="rounded-3xl border border-border bg-surface p-6 text-sm text-text shadow-sm">
+        <p className="font-semibold">Este negocio aún no tiene categorías públicas.</p>
+        <p className="mt-2 text-muted">Cuando el comercio agregue su catálogo, aquí verás las categorías disponibles.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-surface border border-border rounded-3xl p-6 shadow-sm">
       <div className="mb-8">
-        <label className="block text-sm font-medium text-muted mb-3">
-          Buscar en el menú
-        </label>
+        <label className="block text-sm font-medium text-muted mb-3">Buscar en el menú</label>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1">
-            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-muted">
-              🔎
-            </span>
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-muted">🔎</span>
             <input
               type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Hamburguesa, hotdogs..."
               className="w-full rounded-2xl border border-border bg-background px-12 py-3 text-text placeholder:text-muted outline-none transition focus:border-primary"
             />
           </div>
           <button
             type="button"
+            onClick={() => setSearchTerm('')}
             className="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
           >
-            Buscar
+            Limpiar
           </button>
         </div>
       </div>
@@ -160,24 +196,24 @@ export default function NegocioCategoriesSpy() {
         style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
       >
         <div className="flex items-center gap-3 min-w-180">
-          {categorySections.map((item) => (
+          {sections.map((section) => (
             <button
-              key={item.id}
-              id={`category-tab-${item.id}`}
+              key={section.id}
+              id={`category-tab-${section.id}`}
               type="button"
               onClick={() => {
-                const section = document.getElementById(item.id)
-                section?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                centerActiveTab(item.id)
+                const sectionElement = document.getElementById(section.id)
+                sectionElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                centerActiveTab(section.id)
               }}
               className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                activeSection === item.id
+                activeSection === section.id
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-background text-text border border-border hover:bg-surface'
               }`}
-              aria-current={activeSection === item.id ? 'true' : undefined}
+              aria-current={activeSection === section.id ? 'true' : undefined}
             >
-              {item.title}
+              {section.name}
             </button>
           ))}
         </div>
@@ -188,7 +224,7 @@ export default function NegocioCategoriesSpy() {
         className="space-y-8 max-h-180 overflow-y-auto pr-2 scroll-smooth hide-scrollbar"
         style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
       >
-        {categorySections.map((section, index) => (
+        {sections.map((section, index) => (
           <section
             key={section.id}
             id={section.id}
@@ -201,31 +237,46 @@ export default function NegocioCategoriesSpy() {
             <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-border bg-background p-6 shadow-sm">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold text-text">{section.title}</h2>
-                  <p className="text-sm text-muted">{section.subtitle}</p>
+                  <h2 className="text-2xl font-semibold text-text">{section.name}</h2>
+                  <p className="text-sm text-muted">{section.products.length} opciones</p>
                 </div>
                 <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800">
-                  {section.cards.length} opciones
+                  {section.products.length} artículos
                 </span>
               </div>
-              <p className="text-sm leading-relaxed text-muted">{section.description}</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {section.cards.map((card) => (
-                <div key={card.name} className="rounded-3xl border border-border bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                  <h3 className="text-lg font-semibold text-text">{card.name}</h3>
-                  <p className="mt-2 text-sm text-muted leading-relaxed">{card.detail}</p>
-                  <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary">
-                    Ver más
-                    <span aria-hidden="true">→</span>
+            {section.products.length === 0 ? (
+              <div className="rounded-3xl border border-border bg-surface p-6 text-sm text-muted">
+                Aún no hay productos en esta categoría.
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {section.products.map((product) => (
+                  <div key={product.id} className="rounded-3xl border border-border bg-surface p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="h-40 overflow-hidden rounded-3xl bg-slate-100">
+                      <img
+                        src={product.imageUrl ?? 'https://via.placeholder.com/320x240?text=Producto'}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold text-text">{product.name}</h3>
+                    <p className="mt-2 text-sm text-muted leading-relaxed min-h-[3rem]">
+                      {product.description ?? 'Producto sin descripción.'}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between gap-3 text-sm font-semibold text-text">
+                      <span>${product.price.toFixed(2)}</span>
+                      <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">{product.isActive ? 'Disponible' : 'No disponible'}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
       </div>
+
       <style jsx>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Navbar from '@/src/components/Navbar'
 import { useRequireAuth } from '@/src/lib/hooks/useRequireAuth'
-import { dashboardClient, NegocioDashboard, ProductAddition, ProductDashboard, ProductIngredient } from '@/src/lib/dashboard-client'
+import { dashboardClient, NegocioDashboard, ProductAddition, ProductCategoryDashboard, ProductDashboard, ProductIngredient } from '@/src/lib/dashboard-client'
 import { BUSINESS_CATEGORIES } from '@/src/constants/categories'
 
 const ingredientSchema = z.object({
@@ -39,7 +39,7 @@ type ProductFormValues = z.infer<typeof productSchema>
 const defaultValues: ProductFormValues = {
   name: '',
   description: undefined,
-  category: BUSINESS_CATEGORIES[0] ?? 'Otros',
+  category: '',
   price: 0,
   stock: 0,
   isActive: true,
@@ -54,6 +54,7 @@ export default function ProductCatalogPage() {
   const [selectedProduct, setSelectedProduct] = useState<ProductDashboard | null>(null)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [categories, setCategories] = useState<ProductCategoryDashboard[]>([])
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   const [isBusy, setIsBusy] = useState(false)
 
@@ -72,8 +73,8 @@ export default function ProductCatalogPage() {
   const additionsFieldArray = useFieldArray({ control, name: 'additions' })
 
   const categoryOptions = useMemo(
-    () => [...BUSINESS_CATEGORIES, 'Otros'],
-    [],
+    () => categories.map((category) => category.name),
+    [categories],
   )
 
   useEffect(() => {
@@ -84,8 +85,12 @@ export default function ProductCatalogPage() {
       try {
         const ownerBusiness = await dashboardClient.negocios.getByOwner(token)
         setNegocio(ownerBusiness)
-        const result = await dashboardClient.productos.listByBusiness(ownerBusiness.id, token)
-        setProducts(result.data)
+        const [productsResult, categoriesResult] = await Promise.all([
+          dashboardClient.productos.listByBusiness(ownerBusiness.id, token),
+          dashboardClient.productCategories.listByBusiness(ownerBusiness.id, token),
+        ])
+        setProducts(productsResult.data)
+        setCategories(categoriesResult.data)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'No se pudo cargar el negocio'
         setStatusMessage({ type: 'error', text: message })
@@ -112,6 +117,15 @@ export default function ProductCatalogPage() {
       setImagePreview(selectedProduct.imageUrl ?? null)
     }
   }, [reset, selectedProduct])
+
+  useEffect(() => {
+    if (!selectedProduct && categories.length > 0) {
+      reset((current) => ({
+        ...current,
+        category: categories[0].name,
+      }))
+    }
+  }, [categories, reset, selectedProduct])
 
   const refreshProducts = async () => {
     if (!token || !negocio) return
@@ -159,6 +173,10 @@ export default function ProductCatalogPage() {
 
   const onSubmit = async (values: ProductFormValues) => {
     if (!token || !negocio) return
+    if (categories.length === 0) {
+      setStatusMessage({ type: 'error', text: 'Crea al menos una categoría antes de crear productos.' })
+      return
+    }
 
     try {
       setStatusMessage(null)
@@ -249,6 +267,13 @@ export default function ProductCatalogPage() {
           </div>
         )}
 
+        {categories.length === 0 && (
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900 mb-6">
+            <p className="font-semibold">No puedes crear productos sin categorías.</p>
+            <p className="mt-1">Agrega al menos una categoría para tu negocio y luego vuelve a crear productos.</p>
+          </div>
+        )}
+
         <div className="grid gap-6 xl:grid-cols-[1.6fr_1.4fr]">
           <section className="space-y-6">
             <div className="flex flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-6">
@@ -257,13 +282,21 @@ export default function ProductCatalogPage() {
                   <h2 className="text-lg font-semibold text-text">Productos</h2>
                   <p className="text-sm text-muted">Usa las tarjetas para editar o eliminar rápidamente.</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
-                >
-                  Nuevo producto
-                </button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="inline-flex items-center justify-center rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+                  >
+                    Nuevo producto
+                  </button>
+                  <a
+                    href="/mi-negocio/categorias"
+                    className="inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface"
+                  >
+                    Administrar categorías
+                  </a>
+                </div>
               </div>
 
               {products.length === 0 ? (
@@ -362,8 +395,10 @@ export default function ProductCatalogPage() {
                     Categoría
                     <select
                       {...register('category')}
-                      className="mt-2 w-full rounded-3xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary"
+                      disabled={categories.length === 0}
+                      className="mt-2 w-full rounded-3xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
                     >
+                      <option value="">Selecciona una categoría</option>
                       {categoryOptions.map((category) => (
                         <option key={category} value={category}>
                           {category}
@@ -565,7 +600,7 @@ export default function ProductCatalogPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="submit"
-                    disabled={isSubmitting || isBusy}
+                    disabled={isSubmitting || isBusy || categories.length === 0}
                     className="inline-flex min-w-[180px] items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
                   >
                     {selectedProduct ? 'Guardar cambios' : 'Crear producto'}

@@ -82,6 +82,22 @@ export interface ProductDashboard {
   updatedAt: string
 }
 
+export interface ProductCategoryDashboard {
+  id: string
+  negocioId: string
+  name: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ListProductCategoriesByBusinessResponse {
+  data: ProductCategoryDashboard[]
+  total: number
+  page: number
+  totalPages: number
+}
+
 export interface ListProductsByBusinessResponse {
   data: ProductDashboard[]
   total: number
@@ -134,6 +150,28 @@ export const dashboardClient = {
     },
     getChats(id: string, token: string, page = 1): Promise<{ data: ChatSessionItem[]; total: number }> {
       return authFetch(`/api/negocios/${id}/chats?page=${page}`, { token, method: 'GET' })
+    },
+  },
+  productCategories: {
+    listByBusiness(id: string, token: string, page = 1, limit = 50): Promise<ListProductCategoriesByBusinessResponse> {
+      return authFetch(`/api/negocios/${id}/categorias?page=${page}&limit=${limit}`, { token, method: 'GET' })
+    },
+    create(id: string, data: { name: string; isActive?: boolean }, token: string): Promise<ProductCategoryDashboard> {
+      return authFetch(`/api/negocios/${id}/categorias`, {
+        token,
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+    },
+    update(id: string, data: { name?: string; isActive?: boolean }, token: string): Promise<ProductCategoryDashboard> {
+      return authFetch(`/api/categorias/${id}`, {
+        token,
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    },
+    delete(id: string, token: string): Promise<{ message: string }> {
+      return authFetch(`/api/categorias/${id}`, { token, method: 'DELETE' })
     },
   },
   productos: {

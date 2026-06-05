@@ -230,7 +230,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="max-w-6xl mx-auto py-10 px-6">
         <h1 className="text-3xl font-bold text-text mb-1">
           {isAdmin ? 'Panel de Administración' : 'Dashboard'}

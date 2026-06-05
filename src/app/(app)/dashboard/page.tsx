@@ -1,11 +1,15 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import Navbar from '@/src/components/Navbar'
-import DashboardSidebar from '@/src/components/DashboardSidebar'
-import { useRequireAuth } from '@/src/lib/hooks/useRequireAuth'
-import { dashboardClient, NegocioDashboard, ChatSessionItem } from '@/src/lib/dashboard-client'
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import Navbar from "@/src/components/Navbar"
+import DashboardSidebar from "@/src/components/DashboardSidebar"
+import { useRequireAuth } from "@/src/lib/hooks/useRequireAuth"
+import {
+  dashboardClient,
+  NegocioDashboard,
+  ChatSessionItem,
+} from "@/src/lib/dashboard-client"
 
 const cardStyle = "bg-surface border border-border rounded-xl p-6"
 
@@ -22,7 +26,7 @@ function OwnerDashboard({ token }: { token: string }) {
   const [negocio, setNegocio] = useState<NegocioDashboard | null>(null)
   const [recentChats, setRecentChats] = useState<ChatSessionItem[]>([])
   const [chatsHoy, setChatsHoy] = useState(0)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
 
   useEffect(() => {
     dashboardClient.negocios
@@ -34,12 +38,12 @@ function OwnerDashboard({ token }: { token: string }) {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         const todayChats = chatResult.data.filter(
-          (c) => new Date(c.createdAt) >= today
+          (c) => new Date(c.createdAt) >= today,
         ).length
         setChatsHoy(todayChats)
       })
       .catch(() => {
-        setError('No tienes un negocio registrado aún.')
+        setError("No tienes un negocio registrado aún.")
       })
   }, [token])
 
@@ -64,9 +68,12 @@ function OwnerDashboard({ token }: { token: string }) {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Chats hoy', value: chatsHoy },
-          { label: 'Total chats', value: recentChats.length },
-          { label: 'Chatbot', value: negocio.trainingData ? '✅ Entrenado' : '⚠️ Sin entrenar' },
+          { label: "Chats hoy", value: chatsHoy },
+          { label: "Total chats", value: recentChats.length },
+          {
+            label: "Chatbot",
+            value: negocio.trainingData ? "✅ Entrenado" : "⚠️ Sin entrenar",
+          },
         ].map((stat) => (
           <div key={stat.label} className={cardStyle}>
             <p className="text-muted text-sm mb-2">{stat.label}</p>
@@ -85,15 +92,21 @@ function OwnerDashboard({ token }: { token: string }) {
         ) : (
           <div className="flex flex-col gap-3">
             {recentChats.map((chat) => (
-              <div key={chat.id} className="border-b border-border pb-3 last:border-0">
+              <div
+                key={chat.id}
+                className="border-b border-border pb-3 last:border-0"
+              >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="font-medium text-sm">{chat.clientePhone}</span>
+                  <span className="font-medium text-sm">
+                    {chat.clientePhone}
+                  </span>
                   <span className="text-xs text-muted">
-                    {new Date(chat.updatedAt).toLocaleDateString('es-CO')}
+                    {new Date(chat.updatedAt).toLocaleDateString("es-CO")}
                   </span>
                 </div>
                 <p className="text-xs text-muted m-0">
-                  {chat.historial.length} mensaje{chat.historial.length !== 1 ? 's' : ''}
+                  {chat.historial.length} mensaje
+                  {chat.historial.length !== 1 ? "s" : ""}
                 </p>
               </div>
             ))}
@@ -114,19 +127,25 @@ function AdminDashboard({ token }: { token: string }) {
     async function fetchData() {
       try {
         // Fetch stats
-        const res = await fetch('http://localhost:3001/api/negocios/admin/stats', {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include',
-        })
+        const res = await fetch(
+          "http://localhost:3001/api/negocios/admin/stats",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          },
+        )
         if (res.ok) {
           setStats(await res.json())
         }
-        
+
         // Fetch negocios
-        const resNeg = await fetch('http://localhost:3001/api/negocios?limit=100', {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include',
-        })
+        const resNeg = await fetch(
+          "http://localhost:3001/api/negocios?limit=100",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+          },
+        )
         if (resNeg.ok) {
           const data = await resNeg.json()
           setNegocios(data.data || [])
@@ -140,18 +159,26 @@ function AdminDashboard({ token }: { token: string }) {
     fetchData()
   }, [token])
 
-  if (loading) return <div className="text-center text-muted py-8">Cargando estadísticas...</div>
+  if (loading)
+    return (
+      <div className="text-center text-muted py-8">
+        Cargando estadísticas...
+      </div>
+    )
 
   return (
     <>
       {/* Admin Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-8">
         {[
-          { label: 'Total Negocios', value: stats?.totalNegocios ?? 0 },
-          { label: 'Negocios Activos', value: stats?.negociosActivos ?? 0 },
-          { label: 'Chatbots Entrenados', value: stats?.negociosConChatbot ?? 0 },
-          { label: 'Total Chats', value: stats?.totalChats ?? 0 },
-          { label: 'Chats Hoy', value: stats?.chatsHoy ?? 0 },
+          { label: "Total Negocios", value: stats?.totalNegocios ?? 0 },
+          { label: "Negocios Activos", value: stats?.negociosActivos ?? 0 },
+          {
+            label: "Chatbots Entrenados",
+            value: stats?.negociosConChatbot ?? 0,
+          },
+          { label: "Total Chats", value: stats?.totalChats ?? 0 },
+          { label: "Chats Hoy", value: stats?.chatsHoy ?? 0 },
         ].map((stat) => (
           <div key={stat.label} className={cardStyle}>
             <p className="text-muted text-sm mb-1">{stat.label}</p>
@@ -170,14 +197,21 @@ function AdminDashboard({ token }: { token: string }) {
         ) : (
           <div className="flex flex-col gap-3">
             {negocios.slice(0, 10).map((n) => (
-              <div key={n.id} className="border-b border-border pb-3 last:border-0 flex justify-between items-center">
+              <div
+                key={n.id}
+                className="border-b border-border pb-3 last:border-0 flex justify-between items-center"
+              >
                 <div>
                   <p className="font-medium text-sm">{n.name}</p>
-                  <p className="text-xs text-muted">{n.city} · {n.category}</p>
+                  <p className="text-xs text-muted">
+                    {n.city} · {n.category}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <span className={`text-xs px-2 py-1 rounded ${n.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {n.isActive ? 'Activo' : 'Inactivo'}
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${n.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    {n.isActive ? "Activo" : "Inactivo"}
                   </span>
                 </div>
               </div>
@@ -192,33 +226,29 @@ function AdminDashboard({ token }: { token: string }) {
 export default function DashboardPage() {
   const { user, token, loading } = useRequireAuth()
 
-  if (loading) return <div className="py-16 text-center text-muted">Cargando...</div>
+  if (loading)
+    return <div className="py-16 text-center text-muted">Cargando...</div>
 
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = user?.role === "admin"
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      <div className="flex flex-1">
-        <DashboardSidebar userRole={isAdmin ? 'admin' : 'owner'} />
-        
-        <main className="flex-1 py-10 px-6 overflow-y-auto">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-text mb-1">
-              {isAdmin ? 'Panel de Administración' : 'Dashboard'}
-            </h1>
-            {user && (
-              <p className="text-muted mb-8">Bienvenido, {user.name} {isAdmin && '👑'}</p>
-            )}
+    <main className="flex-1 py-10 px-6 overflow-y-auto">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-text mb-1">
+          {isAdmin ? "Panel de Administración" : "Dashboard"}
+        </h1>
+        {user && (
+          <p className="text-muted mb-8">
+            Bienvenido, {user.name} {isAdmin && "👑"}
+          </p>
+        )}
 
-            {isAdmin ? (
-              <AdminDashboard token={token!} />
-            ) : (
-              <OwnerDashboard token={token!} />
-            )}
-          </div>
-        </main>
+        {isAdmin ? (
+          <AdminDashboard token={token!} />
+        ) : (
+          <OwnerDashboard token={token!} />
+        )}
       </div>
-    </div>
+    </main>
   )
 }

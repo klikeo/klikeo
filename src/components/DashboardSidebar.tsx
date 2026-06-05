@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   Store,
@@ -11,69 +11,69 @@ import {
   Users,
   Eye,
   Settings,
-} from 'lucide-react'
+} from "lucide-react"
+import { useRequireAuth } from "../lib/hooks/useRequireAuth"
 
 interface SidebarItem {
   href: string
   label: string
   icon: React.ReactNode
-  roles: ('owner' | 'admin')[]
+  roles: ("owner" | "admin")[]
 }
 
 const sidebarItems: SidebarItem[] = [
   {
-    href: '/dashboard',
-    label: 'Dashboard',
+    href: "/dashboard",
+    label: "Dashboard",
     icon: <LayoutDashboard size={20} />,
-    roles: ['owner', 'admin'],
+    roles: ["owner", "admin"],
   },
   {
-    href: '/mi-negocio',
-    label: 'Mi Negocio',
+    href: "/mi-negocio",
+    label: "Mi Negocio",
     icon: <Store size={20} />,
-    roles: ['owner'],
+    roles: ["owner"],
   },
   {
-    href: '/mi-negocio/productos',
-    label: 'Productos',
+    href: "/mi-negocio/productos",
+    label: "Productos",
     icon: <Package size={20} />,
-    roles: ['owner'],
+    roles: ["owner"],
   },
   {
-    href: '/chats',
-    label: 'Conversaciones',
+    href: "/chats",
+    label: "Conversaciones",
     icon: <MessageSquare size={20} />,
-    roles: ['owner'],
+    roles: ["owner"],
   },
   {
-    href: '/chatbot',
-    label: 'Entrenar Chatbot',
+    href: "/chatbot",
+    label: "Entrenar Chatbot",
     icon: <Bot size={20} />,
-    roles: ['owner'],
+    roles: ["owner"],
   },
   {
-    href: '/negocios',
-    label: 'Ver Negocios',
+    href: "/negocios",
+    label: "Ver Negocios",
     icon: <Eye size={20} />,
-    roles: ['admin'],
+    roles: ["admin"],
   },
   {
-    href: '/admin/users',
-    label: 'Gestión Usuarios',
+    href: "/admin/users",
+    label: "Gestión Usuarios",
     icon: <Users size={20} />,
-    roles: ['admin'],
+    roles: ["admin"],
   },
 ]
 
-interface DashboardSidebarProps {
-  userRole: 'owner' | 'admin'
-}
-
-export default function DashboardSidebar({ userRole }: DashboardSidebarProps) {
+export default function DashboardSidebar() {
   const pathname = usePathname()
+  const { user } = useRequireAuth()
+
+  const userRole = user?.role === "admin" ? "admin" : "owner"
 
   const filteredItems = sidebarItems.filter((item) =>
-    item.roles.includes(userRole)
+    item.roles.includes(userRole),
   )
 
   return (
@@ -87,7 +87,7 @@ export default function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           {filteredItems.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== '/dashboard' && pathname.startsWith(item.href))
+              (item.href !== "/dashboard" && pathname.startsWith(item.href))
 
             return (
               <Link
@@ -95,8 +95,8 @@ export default function DashboardSidebar({ userRole }: DashboardSidebarProps) {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg no-underline transition-all ${
                   isActive
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-text hover:bg-border/50 text-opacity-80'
+                    ? "bg-primary text-white shadow-md"
+                    : "text-text hover:bg-border/50 text-opacity-80"
                 }`}
               >
                 <div className="flex-shrink-0">{item.icon}</div>

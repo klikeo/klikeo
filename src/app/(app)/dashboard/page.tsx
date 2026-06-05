@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from '@/src/components/Navbar'
+import DashboardSidebar from '@/src/components/DashboardSidebar'
 import { useRequireAuth } from '@/src/lib/hooks/useRequireAuth'
 import { dashboardClient, NegocioDashboard, ChatSessionItem } from '@/src/lib/dashboard-client'
 
@@ -71,23 +72,6 @@ function OwnerDashboard({ token }: { token: string }) {
             <p className="text-muted text-sm mb-2">{stat.label}</p>
             <p className="text-2xl font-bold text-text m-0">{stat.value}</p>
           </div>
-        ))}
-      </div>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {[
-          { href: '/mi-negocio', label: 'Editar negocio', desc: 'Actualiza tu perfil público' },
-          { href: '/mi-negocio/productos', label: 'Productos', desc: 'Administra el catálogo de tu negocio' },
-          { href: '/chatbot', label: 'Entrenar chatbot', desc: 'Enseña a tu asistente virtual' },
-          { href: '/chats', label: 'Ver conversaciones', desc: 'Historial de chats de WhatsApp' },
-        ].map((link) => (
-          <Link key={link.href} href={link.href} className="no-underline">
-            <div className={`${cardStyle} hover:shadow-md transition-shadow cursor-pointer`}>
-              <p className="font-semibold text-primary mb-1">{link.label}</p>
-              <p className="text-sm text-muted m-0">{link.desc}</p>
-            </div>
-          </Link>
         ))}
       </div>
 
@@ -176,22 +160,6 @@ function AdminDashboard({ token }: { token: string }) {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <Link href="/negocios" className="no-underline">
-          <div className={`${cardStyle} hover:shadow-md transition-shadow cursor-pointer`}>
-            <p className="font-semibold text-primary mb-1">🔍 Ver Todos los Negocios</p>
-            <p className="text-sm text-muted m-0">Explorar el directorio completo</p>
-          </div>
-        </Link>
-        <Link href="/admin/users" className="no-underline">
-          <div className={`${cardStyle} hover:shadow-md transition-shadow cursor-pointer`}>
-            <p className="font-semibold text-primary mb-1">👥 Gestión de Usuarios</p>
-            <p className="text-sm text-muted m-0">Administrar usuarios registrados</p>
-          </div>
-        </Link>
-      </div>
-
       {/* Recent Businesses */}
       <div className={cardStyle}>
         <h2 className="text-lg font-semibold text-text mb-4">
@@ -229,20 +197,27 @@ export default function DashboardPage() {
   const isAdmin = user?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold text-text mb-1">
-          {isAdmin ? 'Panel de Administración' : 'Dashboard'}
-        </h1>
-        {user && (
-          <p className="text-muted mb-8">Bienvenido, {user.name} {isAdmin && '👑'}</p>
-        )}
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      <div className="flex flex-1">
+        <DashboardSidebar userRole={isAdmin ? 'admin' : 'owner'} />
+        
+        <main className="flex-1 py-10 px-6 overflow-y-auto">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold text-text mb-1">
+              {isAdmin ? 'Panel de Administración' : 'Dashboard'}
+            </h1>
+            {user && (
+              <p className="text-muted mb-8">Bienvenido, {user.name} {isAdmin && '👑'}</p>
+            )}
 
-        {isAdmin ? (
-          <AdminDashboard token={token!} />
-        ) : (
-          <OwnerDashboard token={token!} />
-        )}
+            {isAdmin ? (
+              <AdminDashboard token={token!} />
+            ) : (
+              <OwnerDashboard token={token!} />
+            )}
+          </div>
+        </main>
       </div>
     </div>
   )

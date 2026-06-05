@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 
 import { useAuth } from "@/src/lib/auth-context"
+import { LayoutDashboard, Store, Package, MessageSquare, Bot, Users, Eye, Settings } from "lucide-react"
 
 interface NavbarProps {
   isAdmin?: boolean
@@ -18,6 +19,22 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
     setIsOpen(false)
   }
 
+  const userRole = user?.role === 'admin' ? 'admin' : 'owner'
+
+  // Dashboard navigation items
+  const dashboardLinks = user ? [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ...(userRole === 'owner' ? [
+      { href: '/mi-negocio', label: 'Mi Negocio', icon: Store },
+      { href: '/mi-negocio/productos', label: 'Productos', icon: Package },
+      { href: '/chats', label: 'Conversaciones', icon: MessageSquare },
+      { href: '/chatbot', label: 'Entrenar Chatbot', icon: Bot },
+    ] : [
+      { href: '/negocios', label: 'Ver Negocios', icon: Eye },
+      { href: '/admin/users', label: 'Gestión Usuarios', icon: Users },
+    ]),
+  ] : []
+
   const navLinks = user
     ? [
         { href: "/dashboard", label: "Dashboard" },
@@ -25,7 +42,7 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
         { href: "/mi-negocio", label: "Mi Negocio" },
         { href: "/chats", label: "Chats" },
         { href: "/chatbot", label: "Chatbot" },
-        ...(isAdmin ? [{ href: "/admin/users", label: "Usuarios" }] : []),
+        ...(user.role === 'admin' ? [{ href: "/admin/users", label: "Usuarios" }] : []),
         { href: "/politicas-de-privacidad", label: "Políticas" },
       ]
     : [
@@ -121,8 +138,8 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
           />
 
           {/* Menú desde la izquierda */}
-          <div className="absolute left-0 top-0 h-full w-72 bg-surface shadow-2xl animate-slide-in">
-            <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+          <div className="absolute left-0 top-0 h-full w-72 bg-surface shadow-2xl animate-slide-in overflow-y-auto">
+            <div className="flex items-center justify-between h-16 px-4 border-b border-border sticky top-0 bg-surface z-10">
               <span className="text-xl font-bold text-primary">Klikeo</span>
               <button
                 onClick={() => setIsOpen(false)}
@@ -146,6 +163,33 @@ export default function Navbar({ isAdmin = false }: NavbarProps) {
             </div>
 
             <div className="py-4">
+              {/* Dashboard Links Section (for authenticated users) */}
+              {user && dashboardLinks.length > 0 && (
+                <>
+                  <div className="px-4 py-2 text-xs font-semibold text-muted uppercase tracking-wider">
+                    Navegación
+                  </div>
+                  <div className="space-y-1">
+                    {dashboardLinks.map((link) => {
+                      const Icon = link.icon
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-text hover:bg-border/50 no-underline transition-colors"
+                        >
+                          <Icon size={18} />
+                          <span className="font-medium text-sm">{link.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                  <div className="my-4 border-t border-border" />
+                </>
+              )}
+
+              {/* Regular Links */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}

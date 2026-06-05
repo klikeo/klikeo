@@ -1,90 +1,172 @@
-import { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { apiClient } from "@/src/lib/api-client"
-import BusinessChatBubble from "@/src/components/BusinessChatBubble"
-import NegocioCategoriesSpy from "@/src/components/NegocioCategoriesSpy"
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { apiClient } from "@/src/lib/api-client";
+import BusinessChatBubble from "@/src/components/BusinessChatBubble";
+import NegocioCategoriesSpy from "@/src/components/NegocioCategoriesSpy";
 
 interface NegocioPageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 3600
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
 }: NegocioPageProps): Promise<Metadata> {
-  const { slug } = await params
+  const { slug } = await params;
   try {
-    const negocio = await apiClient.negocios.getById(slug)
+    const negocio = await apiClient.negocios.getById(slug);
     return {
       title: `${negocio.name} — Klikeo`,
       description: negocio.description ?? `${negocio.name} en ${negocio.city}`,
-    }
+    };
   } catch {
-    return { title: "Negocio — Klikeo" }
+    return { title: "Negocio — Klikeo" };
   }
 }
 
 export default async function NegocioDetailPage({ params }: NegocioPageProps) {
-  const { slug } = await params
-  let negocio
+  const { slug } = await params;
+  let negocio;
   try {
-    negocio = await apiClient.negocios.getById(slug)
+    negocio = await apiClient.negocios.getById(slug);
   } catch {
-    notFound()
+    notFound();
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto py-10 px-6">
-        {negocio.bannerUrl && (
-          <div className="mb-6 overflow-hidden rounded-3xl border border-border">
-            <img
-              src={negocio.bannerUrl}
-              alt={`${negocio.name} banner`}
-              className="w-full h-60 object-cover"
-            />
+      <div className="max-w-3xl mx-auto">
+        {/* Banner + Logo superpuesto */}
+        <div style={{ position: "relative", marginBottom: "56px" }}>
+          <div
+            className="max-h-[154px] sm:max-h-none"
+            style={{
+              width: "100%",
+              height: "220px",
+              overflow: "hidden",
+              borderRadius: "0 0 20px 20px",
+            }}
+          >
+            {negocio.bannerUrl ? (
+              <img
+                src={negocio.bannerUrl}
+                alt={`${negocio.name} banner`}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background:
+                    "linear-gradient(135deg, #0f172a 0%, #0e7490 100%)",
+                }}
+              />
+            )}
           </div>
-        )}
-        <div className="bg-surface border border-border rounded-xl p-8 mb-6">
-          <div className="flex items-center gap-5 mb-5 flex-wrap">
+
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-40px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "120px",
+              height: "120px",
+              borderRadius: "50%",
+              background: "#fff",
+              border: "3px solid #fff",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+          >
             {negocio.logoUrl ? (
               <img
                 src={negocio.logoUrl}
                 alt={negocio.name}
-                className="w-20 h-20 rounded-xl object-cover"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-primary text-white flex items-center justify-center text-3xl font-bold shrink-0">
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "#0e7490",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "28px",
+                  fontWeight: 700,
+                  color: "#fff",
+                }}
+              >
                 {negocio.name.charAt(0).toUpperCase()}
               </div>
             )}
-            <div>
-              <h1 className="text-3xl font-bold text-text mb-2">
-                {negocio.name}
-              </h1>
-              <div className="flex gap-3 flex-wrap items-center">
-                <span className="text-muted text-sm">📍 {negocio.city}</span>
-                <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-medium capitalize">
-                  {negocio.category}
-                </span>
-              </div>
-            </div>
           </div>
+        </div>
 
+        {/* Nombre + descripción + badges */}
+        <div style={{ textAlign: "center", padding: "0 1rem 1.25rem" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: 600, margin: "0 0 4px" }}>
+            {negocio.name}
+          </h1>
           {negocio.description && (
-            <p className="text-text text-base leading-relaxed mb-5">
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#6b7280",
+                margin: "0 0 14px",
+                lineHeight: 1.5,
+              }}
+            >
               {negocio.description}
             </p>
           )}
-
-          <div className="flex flex-col gap-2">
-            {negocio.address && (
-              <p className="text-muted text-sm">🏠 {negocio.address}</p>
-            )}
-            {negocio.phone && (
-              <p className="text-muted text-sm">📞 {negocio.phone}</p>
-            )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                background: "#fef3c7",
+                color: "#92400e",
+                fontSize: "12px",
+                fontWeight: 500,
+                padding: "4px 12px",
+                borderRadius: "20px",
+                textTransform: "capitalize",
+              }}
+            >
+              {negocio.category}
+            </span>
+            <span
+              style={{
+                background: "#d1fae5",
+                color: "#065f46",
+                fontSize: "12px",
+                fontWeight: 500,
+                padding: "4px 12px",
+                borderRadius: "20px",
+              }}
+            >
+              ● Abierto · Cierra 11pm
+            </span>
           </div>
         </div>
 
@@ -98,5 +180,5 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

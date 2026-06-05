@@ -1,4 +1,5 @@
 import DashboardSidebar from "@/src/components/DashboardSidebar"
+import Footer from "@/src/components/Footer"
 import Navbar from "@/src/components/Navbar"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <DashboardSidebar />
 
           {children}
+          <Footer />
         </div>
       </div>
     </div>

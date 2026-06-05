@@ -1,37 +1,38 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { apiClient } from "@/src/lib/api-client";
-import BusinessChatBubble from "@/src/components/BusinessChatBubble";
-import NegocioCategoriesSpy from "@/src/components/NegocioCategoriesSpy";
+import { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { apiClient } from "@/src/lib/api-client"
+import BusinessChatBubble from "@/src/components/BusinessChatBubble"
+import NegocioCategoriesSpy from "@/src/components/NegocioCategoriesSpy"
+import Footer from "@/src/components/Footer"
 
 interface NegocioPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }
 
-export const revalidate = 3600;
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,
 }: NegocioPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = await params
   try {
-    const negocio = await apiClient.negocios.getById(slug);
+    const negocio = await apiClient.negocios.getById(slug)
     return {
       title: `${negocio.name} — Klikeo`,
       description: negocio.description ?? `${negocio.name} en ${negocio.city}`,
-    };
+    }
   } catch {
-    return { title: "Negocio — Klikeo" };
+    return { title: "Negocio — Klikeo" }
   }
 }
 
 export default async function NegocioDetailPage({ params }: NegocioPageProps) {
-  const { slug } = await params;
-  let negocio;
+  const { slug } = await params
+  let negocio
   try {
-    negocio = await apiClient.negocios.getById(slug);
+    negocio = await apiClient.negocios.getById(slug)
   } catch {
-    notFound();
+    notFound()
   }
 
   return (
@@ -179,6 +180,7 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
           />
         </div>
       </div>
+      <Footer />
     </div>
-  );
+  )
 }

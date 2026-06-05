@@ -1,19 +1,26 @@
-'use client'
+"use client"
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import Navbar from '@/src/components/Navbar'
-import { useRequireAuth } from '@/src/lib/hooks/useRequireAuth'
-import { dashboardClient, NegocioDashboard, ProductCategoryDashboard } from '@/src/lib/dashboard-client'
+import {
+  dashboardClient,
+  NegocioDashboard,
+  ProductCategoryDashboard,
+} from "@/src/lib/dashboard-client"
+import { useRequireAuth } from "@/src/lib/hooks/useRequireAuth"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function ProductCategoryManagementPage() {
   const { token, loading } = useRequireAuth()
   const [negocio, setNegocio] = useState<NegocioDashboard | null>(null)
   const [categories, setCategories] = useState<ProductCategoryDashboard[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategoryDashboard | null>(null)
-  const [name, setName] = useState('')
+  const [selectedCategory, setSelectedCategory] =
+    useState<ProductCategoryDashboard | null>(null)
+  const [name, setName] = useState("")
   const [isActive, setIsActive] = useState(true)
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error" | "info"
+    text: string
+  } | null>(null)
   const [isBusy, setIsBusy] = useState(false)
 
   useEffect(() => {
@@ -24,11 +31,18 @@ export default function ProductCategoryManagementPage() {
       try {
         const ownerBusiness = await dashboardClient.negocios.getByOwner(token)
         setNegocio(ownerBusiness)
-        const categoriesResult = await dashboardClient.productCategories.listByBusiness(ownerBusiness.id, token)
+        const categoriesResult =
+          await dashboardClient.productCategories.listByBusiness(
+            ownerBusiness.id,
+            token,
+          )
         setCategories(categoriesResult.data)
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'No se pudieron cargar las categorías'
-        setStatusMessage({ type: 'error', text: message })
+        const message =
+          err instanceof Error
+            ? err.message
+            : "No se pudieron cargar las categorías"
+        setStatusMessage({ type: "error", text: message })
       } finally {
         setIsBusy(false)
       }
@@ -39,13 +53,14 @@ export default function ProductCategoryManagementPage() {
 
   const resetForm = () => {
     setSelectedCategory(null)
-    setName('')
+    setName("")
     setIsActive(true)
   }
 
   const refreshCategories = async () => {
     if (!token || !negocio) return
-    const categoriesResult = await dashboardClient.productCategories.listByBusiness(negocio.id, token)
+    const categoriesResult =
+      await dashboardClient.productCategories.listByBusiness(negocio.id, token)
     setCategories(categoriesResult.data)
   }
 
@@ -54,7 +69,10 @@ export default function ProductCategoryManagementPage() {
     if (!token || !negocio) return
     const trimmedName = name.trim()
     if (!trimmedName) {
-      setStatusMessage({ type: 'error', text: 'El nombre de la categoría es obligatorio.' })
+      setStatusMessage({
+        type: "error",
+        text: "El nombre de la categoría es obligatorio.",
+      })
       return
     }
 
@@ -63,18 +81,33 @@ export default function ProductCategoryManagementPage() {
       setStatusMessage(null)
 
       if (selectedCategory) {
-        await dashboardClient.productCategories.update(selectedCategory.id, { name: trimmedName, isActive }, token)
-        setStatusMessage({ type: 'success', text: 'Categoría actualizada correctamente.' })
+        await dashboardClient.productCategories.update(
+          selectedCategory.id,
+          { name: trimmedName, isActive },
+          token,
+        )
+        setStatusMessage({
+          type: "success",
+          text: "Categoría actualizada correctamente.",
+        })
       } else {
-        await dashboardClient.productCategories.create(negocio.id, { name: trimmedName, isActive }, token)
-        setStatusMessage({ type: 'success', text: 'Categoría creada correctamente.' })
+        await dashboardClient.productCategories.create(
+          negocio.id,
+          { name: trimmedName, isActive },
+          token,
+        )
+        setStatusMessage({
+          type: "success",
+          text: "Categoría creada correctamente.",
+        })
       }
 
       resetForm()
       await refreshCategories()
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al guardar la categoría'
-      setStatusMessage({ type: 'error', text: message })
+      const message =
+        err instanceof Error ? err.message : "Error al guardar la categoría"
+      setStatusMessage({ type: "error", text: message })
     } finally {
       setIsBusy(false)
     }
@@ -89,52 +122,71 @@ export default function ProductCategoryManagementPage() {
 
   const handleDeleteCategory = async (category: ProductCategoryDashboard) => {
     if (!token) return
-    const confirmed = window.confirm(`¿Eliminar la categoría "${category.name}"? Esto solo la marcará como eliminada.`)
+    const confirmed = window.confirm(
+      `¿Eliminar la categoría "${category.name}"? Esto solo la marcará como eliminada.`,
+    )
     if (!confirmed) return
 
     try {
       setIsBusy(true)
       await dashboardClient.productCategories.delete(category.id, token)
-      setStatusMessage({ type: 'success', text: 'Categoría eliminada correctamente.' })
+      setStatusMessage({
+        type: "success",
+        text: "Categoría eliminada correctamente.",
+      })
       if (selectedCategory?.id === category.id) {
         resetForm()
       }
       await refreshCategories()
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al eliminar la categoría'
-      setStatusMessage({ type: 'error', text: message })
+      const message =
+        err instanceof Error ? err.message : "Error al eliminar la categoría"
+      setStatusMessage({ type: "error", text: message })
     } finally {
       setIsBusy(false)
     }
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-background p-16 text-center text-muted">Cargando...</div>
+    return (
+      <div className="min-h-screen bg-background p-16 text-center text-muted">
+        Cargando...
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Categorías</p>
-            <h1 className="mt-3 text-3xl font-semibold text-text">Categorías de productos</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
+              Categorías
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold text-text">
+              Categorías de productos
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Administra las categorías de productos de tu negocio. Hasta que tengas al menos una categoría activa, no podrás crear productos.
+              Administra las categorías de productos de tu negocio. Hasta que
+              tengas al menos una categoría activa, no podrás crear productos.
             </p>
           </div>
-          <Link href="/mi-negocio/productos" className="inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-5 py-3 text-sm font-semibold text-text transition hover:bg-surface/90">
+          <Link
+            href="/mi-negocio/productos"
+            className="inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-5 py-3 text-sm font-semibold text-text transition hover:bg-surface/90"
+          >
             Volver al catálogo de productos
           </Link>
         </div>
 
         {statusMessage && (
-          <div className={`rounded-2xl border px-4 py-3 text-sm ${
-            statusMessage.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-rose-50 border-rose-200 text-rose-900'
-          } mb-6`}>
+          <div
+            className={`rounded-2xl border px-4 py-3 text-sm ${
+              statusMessage.type === "success"
+                ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                : "bg-rose-50 border-rose-200 text-rose-900"
+            } mb-6`}
+          >
             {statusMessage.text}
           </div>
         )}
@@ -144,8 +196,12 @@ export default function ProductCategoryManagementPage() {
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-text">Lista de categorías</h2>
-                  <p className="text-sm text-muted">Edita, activa o elimina las categorías de tu catálogo.</p>
+                  <h2 className="text-lg font-semibold text-text">
+                    Lista de categorías
+                  </h2>
+                  <p className="text-sm text-muted">
+                    Edita, activa o elimina las categorías de tu catálogo.
+                  </p>
                 </div>
                 <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
                   {categories.length} categorías
@@ -155,17 +211,25 @@ export default function ProductCategoryManagementPage() {
               {categories.length === 0 ? (
                 <div className="mt-6 rounded-3xl border border-dashed border-border bg-background p-6 text-center text-muted">
                   <p className="text-sm">Aún no hay categorías definidas.</p>
-                  <p className="mt-2 text-sm">Crea la primera categoría usando el formulario de la derecha.</p>
+                  <p className="mt-2 text-sm">
+                    Crea la primera categoría usando el formulario de la
+                    derecha.
+                  </p>
                 </div>
               ) : (
                 <div className="mt-6 grid gap-4">
                   {categories.map((category) => (
-                    <article key={category.id} className="rounded-3xl border border-border bg-white p-5 shadow-sm">
+                    <article
+                      key={category.id}
+                      className="rounded-3xl border border-border bg-white p-5 shadow-sm"
+                    >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-text">{category.name}</p>
+                          <p className="text-sm font-semibold text-text">
+                            {category.name}
+                          </p>
                           <p className="mt-2 text-xs uppercase tracking-[0.24em] text-muted">
-                            {category.isActive ? 'Activa' : 'Inactiva'}
+                            {category.isActive ? "Activa" : "Inactiva"}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -195,9 +259,11 @@ export default function ProductCategoryManagementPage() {
           <aside className="space-y-6">
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-sm">
               <div className="mb-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Formulario</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
+                  Formulario
+                </p>
                 <h2 className="mt-2 text-xl font-semibold text-text">
-                  {selectedCategory ? 'Editar categoría' : 'Nueva categoría'}
+                  {selectedCategory ? "Editar categoría" : "Nueva categoría"}
                 </h2>
               </div>
 
@@ -230,7 +296,7 @@ export default function ProductCategoryManagementPage() {
                     disabled={isBusy}
                     className="inline-flex min-w-[180px] items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/60"
                   >
-                    {selectedCategory ? 'Guardar cambios' : 'Crear categoría'}
+                    {selectedCategory ? "Guardar cambios" : "Crear categoría"}
                   </button>
                   {selectedCategory && (
                     <button

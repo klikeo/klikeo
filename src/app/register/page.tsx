@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { useAuth } from "@/src/lib/auth-context"
+import Footer from "@/src/components/Footer"
 import Navbar from "@/src/components/Navbar"
+import { useAuth } from "@/src/lib/auth-context"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Eye, EyeOff } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
 const registerSchema = z
   .object({
@@ -155,7 +156,11 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
                 >
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
                 </button>
               </div>
               <FieldError message={errors.confirmPassword?.message} />
@@ -181,6 +186,7 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

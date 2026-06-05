@@ -1,6 +1,7 @@
-import Link from 'next/link'
-import Navbar from '../components/Navbar'
-import AuthGuard from '../components/AuthGuard'
+import Link from "next/link"
+import AuthGuard from "../components/AuthGuard"
+import Footer from "../components/Footer"
+import Navbar from "../components/Navbar"
 
 export default function LandingPage() {
   return (
@@ -11,12 +12,13 @@ export default function LandingPage() {
         {/* Hero */}
         <section className="py-20 px-6 text-center max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-text mb-6 leading-tight">
-            Tu negocio en Colombia,<br />
+            Tu negocio en Colombia,
+            <br />
             <span className="text-primary">atendiendo 24/7</span>
           </h1>
           <p className="text-lg text-muted mb-10 leading-relaxed">
-            Crea tu perfil público y activa un chatbot de WhatsApp personalizado que responde preguntas
-            de tus clientes mientras tú duermes.
+            Crea tu perfil público y activa un chatbot de WhatsApp personalizado
+            que responde preguntas de tus clientes mientras tú duermes.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link
@@ -43,19 +45,19 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  icon: '🏪',
-                  title: 'Perfil público descubrible',
-                  desc: 'Tus clientes te encuentran por categoría, ciudad o nombre en segundos.',
+                  icon: "🏪",
+                  title: "Perfil público descubrible",
+                  desc: "Tus clientes te encuentran por categoría, ciudad o nombre en segundos.",
                 },
                 {
-                  icon: '🤖',
-                  title: 'Chatbot de WhatsApp IA',
-                  desc: 'Entrena tu asistente con datos de tu negocio y atiende clientes sin intervención.',
+                  icon: "🤖",
+                  title: "Chatbot de WhatsApp IA",
+                  desc: "Entrena tu asistente con datos de tu negocio y atiende clientes sin intervención.",
                 },
                 {
-                  icon: '📊',
-                  title: 'Panel de control',
-                  desc: 'Ve todas las conversaciones, estadísticas y actualiza tu información fácilmente.',
+                  icon: "📊",
+                  title: "Panel de control",
+                  desc: "Ve todas las conversaciones, estadísticas y actualiza tu información fácilmente.",
                 },
               ].map((feature) => (
                 <div
@@ -66,7 +68,9 @@ export default function LandingPage() {
                   <h3 className="text-lg font-semibold mb-3 text-text">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-muted leading-relaxed">{feature.desc}</p>
+                  <p className="text-sm text-muted leading-relaxed">
+                    {feature.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -88,6 +92,8 @@ export default function LandingPage() {
             Comenzar ahora →
           </Link>
         </section>
+
+        <Footer />
       </div>
     </AuthGuard>
   )

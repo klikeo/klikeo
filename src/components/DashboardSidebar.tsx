@@ -1,17 +1,18 @@
 "use client"
 
+import
+  {
+    Bot,
+    Eye,
+    LayoutDashboard,
+    MessageSquare,
+    Package,
+    Settings,
+    Store,
+    Users,
+  } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  LayoutDashboard,
-  Store,
-  Package,
-  MessageSquare,
-  Bot,
-  Users,
-  Eye,
-  Settings,
-} from "lucide-react"
 import { useRequireAuth } from "../lib/hooks/useRequireAuth"
 
 interface SidebarItem {
@@ -78,10 +79,6 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="hidden lg:flex w-64 bg-surface border-r border-border flex-col">
-      <div className="p-6 border-b border-border">
-        <h2 className="text-lg font-bold text-text">Navegación</h2>
-      </div>
-
       <nav className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-2">
           {filteredItems.map((item) => {

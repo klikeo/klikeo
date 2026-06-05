@@ -1,10 +1,17 @@
-import { Suspense } from 'react'
-import SearchBar from '@/src/components/SearchBar'
-import NegocioCard from '@/src/components/NegocioCard'
-import { apiClient, ListNegociosParams } from '../../../lib/api-client'
+import Footer from "@/src/components/Footer"
+import Navbar from "@/src/components/Navbar"
+import NegocioCard from "@/src/components/NegocioCard"
+import SearchBar from "@/src/components/SearchBar"
+import { Suspense } from "react"
+import { apiClient, ListNegociosParams } from "../../../lib/api-client"
 
 interface NegociosPageProps {
-  searchParams: Promise<{ search?: string; city?: string; category?: string; page?: string }>
+  searchParams: Promise<{
+    search?: string
+    city?: string
+    category?: string
+    page?: string
+  }>
 }
 
 async function NegocioGrid({ params }: { params: ListNegociosParams }) {
@@ -13,14 +20,17 @@ async function NegocioGrid({ params }: { params: ListNegociosParams }) {
     if (result.data.length === 0) {
       return (
         <div className="text-center py-16 text-muted">
-          <p className="text-lg">No se encontraron negocios con esos filtros.</p>
+          <p className="text-lg">
+            No se encontraron negocios con esos filtros.
+          </p>
         </div>
       )
     }
     return (
       <>
         <p className="text-muted text-sm mb-6">
-          {result.total} negocio{result.total !== 1 ? 's' : ''} encontrado{result.total !== 1 ? 's' : ''}
+          {result.total} negocio{result.total !== 1 ? "s" : ""} encontrado
+          {result.total !== 1 ? "s" : ""}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {result.data.map((negocio) => (
@@ -38,7 +48,9 @@ async function NegocioGrid({ params }: { params: ListNegociosParams }) {
   }
 }
 
-export default async function NegociosPage({ searchParams }: NegociosPageProps) {
+export default async function NegociosPage({
+  searchParams,
+}: NegociosPageProps) {
   const params = await searchParams
   const listParams: ListNegociosParams = {
     search: params.search,
@@ -49,29 +61,33 @@ export default async function NegociosPage({ searchParams }: NegociosPageProps) 
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold text-text mb-2">
-          Negocios en Colombia
-        </h1>
-        <p className="text-muted mb-8">
-          Encuentra y contacta negocios locales en tu ciudad
-        </p>
-        <div className="mb-8">
-          <Suspense>
-            <SearchBar />
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background">
+        <div className="max-w-6xl mx-auto py-10 px-6">
+          <h1 className="text-3xl font-bold text-text mb-2">
+            Negocios en Colombia
+          </h1>
+          <p className="text-muted mb-8">
+            Encuentra y contacta negocios locales en tu ciudad
+          </p>
+          <div className="mb-8">
+            <Suspense>
+              <SearchBar />
+            </Suspense>
+          </div>
+          <Suspense
+            fallback={
+              <div className="text-center py-16 text-muted">
+                Cargando negocios...
+              </div>
+            }
+          >
+            <NegocioGrid params={listParams} />
           </Suspense>
         </div>
-        <Suspense
-          fallback={
-            <div className="text-center py-16 text-muted">
-              Cargando negocios...
-            </div>
-          }
-        >
-          <NegocioGrid params={listParams} />
-        </Suspense>
       </div>
-    </div>
+      <Footer />
+    </>
   )
 }

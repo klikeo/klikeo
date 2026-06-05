@@ -34,7 +34,6 @@ export default function ChatsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="max-w-3xl mx-auto py-10 px-6">
         <h1 className="text-2xl font-bold text-text mb-6">
           Conversaciones de WhatsApp

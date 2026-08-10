@@ -72,29 +72,11 @@ export default function NegocioCategoriesSpy({ businessSlug }: NegocioCategories
     container.scrollTo({ left: offset, behavior: 'smooth' })
   }
 
-  const updateActiveSection = () => {
-    const container = rootRef.current
-    if (!container) return
-
-    const containerTop = container.getBoundingClientRect().top
-    let bestSectionId = activeSection
-    let bestDistance = Number.POSITIVE_INFINITY
-
-    sectionRefs.current.forEach((section) => {
-      if (!section) return
-      const rect = section.getBoundingClientRect()
-      const distance = Math.abs(rect.top - containerTop - 32)
-      if (distance < bestDistance) {
-        bestDistance = distance
-        bestSectionId = section.id
-      }
-    })
-
-    if (bestSectionId !== activeSection) {
-      setActiveSection(bestSectionId)
-    }
-  }
-
+  // Único responsable de detectar la sección activa: IntersectionObserver.
+  // (Antes había además un listener de scroll manual que recalculaba
+  // getBoundingClientRect() de todas las secciones en cada pixel de scroll,
+  // y como dependía de activeSection, el efecto se recreaba constantemente
+  // mientras el usuario scrolleaba → esto era lo que congelaba/crasheaba la página)
   useEffect(() => {
     if (!sections.length) return
 
@@ -119,16 +101,10 @@ export default function NegocioCategoriesSpy({ businessSlug }: NegocioCategories
       if (section) observer.observe(section)
     })
 
-    const container = rootRef.current
-    const handleScroll = () => updateActiveSection()
-    container?.addEventListener('scroll', handleScroll, { passive: true })
-    updateActiveSection()
-
     return () => {
       observer.disconnect()
-      container?.removeEventListener('scroll', handleScroll)
     }
-  }, [sections, activeSection])
+  }, [sections])
 
   useEffect(() => {
     if (activeSection) {

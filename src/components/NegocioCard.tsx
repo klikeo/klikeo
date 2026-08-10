@@ -27,39 +27,51 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function NegocioCard({ negocio }: NegocioCardProps) {
   return (
-    <Link href={`/negocios/${negocio.slug ?? negocio.id}`} className="no-underline text-inherit">
-      <div className="bg-surface border border-border rounded-xl p-5 transition-shadow cursor-pointer h-full hover:shadow-lg">
+    <Link href={`/negocios/${negocio.slug ?? negocio.id}`} className="no-underline text-inherit block h-full">
+      <div className="group h-full rounded-xl border border-dashed border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg">
+
+        {/* "Encabezado de ticket" */}
         <div className="flex items-start gap-3">
+
           {negocio.logoUrl ? (
             <img
               src={negocio.logoUrl}
               alt={negocio.name}
-              className="w-14 h-14 rounded-lg object-cover"
+              className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-14 h-14 rounded-lg bg-primary text-white flex items-center justify-center text-xl font-bold flex-shrink-0">
+            <div className="w-14 h-14 rounded-lg bg-primary text-on-primary flex items-center justify-center text-xl font-heading font-semibold flex-shrink-0">
               {negocio.name.charAt(0).toUpperCase()}
             </div>
           )}
+
           <div className="flex-1 min-w-0">
-            <h3 className="m-0 text-base font-semibold text-text truncate">
+            <h3 className="m-0 text-base font-heading font-semibold text-text truncate">
               {negocio.name}
             </h3>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-text-secondary">
               {negocio.city}
             </p>
           </div>
+
         </div>
+
+        {/* Línea de corte tipo ticket */}
+        <div className="my-4 border-t border-dashed border-border" />
+
         {negocio.description && (
-          <p className="mt-3 text-sm text-muted line-clamp-2">
+          <p className="text-sm text-text-secondary line-clamp-2 leading-6">
             {negocio.description}
           </p>
         )}
-        <div className="mt-3">
-          <span className="inline-block bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full text-xs font-medium">
+
+        {/* "Sello" de categoría */}
+        <div className="mt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 text-accent px-3 py-1 text-xs font-medium tracking-wide uppercase">
             {CATEGORY_LABELS[negocio.category] ?? negocio.category}
           </span>
         </div>
+
       </div>
     </Link>
   )

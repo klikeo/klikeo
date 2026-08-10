@@ -1,251 +1,339 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
-import { useAuth } from "@/src/lib/auth-context"
-import { LayoutDashboard, Store, Package, MessageSquare, Bot, Users, Eye, Settings } from "lucide-react"
+import { useAuth } from "@/src/lib/auth-context";
 
-interface NavbarProps {
-  isAdmin?: boolean
-}
+import {
+  LayoutDashboard,
+  Store,
+  Package,
+  MessageSquare,
+  Bot,
+  Users,
+  Eye,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 
-export default function Navbar({ isAdmin = false }: NavbarProps) {
-  const { user, logout } = useAuth()
-  const [isOpen, setIsOpen] = useState(false)
+export default function Navbar() {
+  const { user, logout } = useAuth();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout()
-    setIsOpen(false)
-  }
+    await logout();
+    setIsOpen(false);
+  };
 
-  const userRole = user?.role === 'admin' ? 'admin' : 'owner'
+  const userRole = user?.role === "admin" ? "admin" : "owner";
 
-  // Dashboard navigation items
-  const dashboardLinks = user ? [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    ...(userRole === 'owner' ? [
-      { href: '/mi-negocio', label: 'Mi Negocio', icon: Store },
-      { href: '/mi-negocio/productos', label: 'Productos', icon: Package },
-      { href: '/chats', label: 'Conversaciones', icon: MessageSquare },
-      { href: '/chatbot', label: 'Entrenar Chatbot', icon: Bot },
-    ] : [
-      { href: '/negocios', label: 'Ver Negocios', icon: Eye },
-      { href: '/admin/users', label: 'Gestión Usuarios', icon: Users },
-    ]),
-  ] : []
-
-  const navLinks = user
+  const dashboardLinks = user
     ? [
-        { href: "/dashboard", label: "Dashboard" },
-        { href: "/mi-negocio/productos", label: "Productos" },
-        { href: "/mi-negocio", label: "Mi Negocio" },
-        { href: "/chats", label: "Chats" },
-        { href: "/chatbot", label: "Chatbot" },
-        ...(user.role === 'admin' ? [{ href: "/admin/users", label: "Usuarios" }] : []),
-        { href: "/politicas-de-privacidad", label: "Políticas" },
+        {
+          href: "/dashboard",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+        },
+
+        ...(userRole === "owner"
+          ? [
+              {
+                href: "/mi-negocio",
+                label: "Mi Negocio",
+                icon: Store,
+              },
+              {
+                href: "/mi-negocio/productos",
+                label: "Productos",
+                icon: Package,
+              },
+              {
+                href: "/chats",
+                label: "Conversaciones",
+                icon: MessageSquare,
+              },
+              {
+                href: "/chatbot",
+                label: "Entrenar IA",
+                icon: Bot,
+              },
+            ]
+          : [
+              {
+                href: "/negocios",
+                label: "Negocios",
+                icon: Eye,
+              },
+              {
+                href: "/admin/users",
+                label: "Usuarios",
+                icon: Users,
+              },
+            ]),
+
+        {
+          href: "/politicas-de-privacidad",
+          label: "Políticas",
+          icon: Settings,
+        },
       ]
-    : [
-        { href: "/negocios", label: "Explorar" },
-        { href: "/politicas-de-privacidad", label: "Políticas" },
-      ]
+    : [];
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="hidden md:flex bg-surface border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16 w-full">
-          <Link href={user ? "/dashboard" : "/"} className="no-underline">
-            <img src="/logo.svg" alt="Klikeo Logo" width={160} height={48} />
+      {/* ==========================
+            DESKTOP
+      ========================== */}
+
+      <nav className="ticket-perforated-bottom sticky top-0 z-50 hidden bg-background/80 backdrop-blur-xl md:block">
+
+        <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-8">
+
+          <Link href={user ? "/dashboard" : "/"}>
+            <Image
+              src="/logo.svg"
+              alt="Klikeo"
+              width={165}
+              height={46}
+              priority
+            />
           </Link>
 
-          <div className="flex items-center gap-6">
-            {!user && (
+          {!user ? (
+            <div className="flex items-center gap-6">
+
               <Link
                 href="/negocios"
-                className="text-text no-underline text-sm hover:text-primary transition-colors"
+                className="font-mono text-xs uppercase tracking-widest text-text-secondary transition hover:text-primary"
               >
                 Explorar
               </Link>
-            )}
 
-            {user ? (
-              <>
-                <span className="text-muted text-sm">{user.name}</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-primary no-underline text-sm font-medium hover:text-primary-dark transition-colors"
-                >
-                  Iniciar sesión
-                </Link>
-                <Link
-                  href="/register"
-                  className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
-                >
-                  Registrar negocio
-                </Link>
-              </>
-            )}
-          </div>
+              <Link
+                href="/login"
+                className="font-mono text-xs uppercase tracking-widest text-primary transition hover:opacity-80"
+              >
+                Iniciar sesión
+              </Link>
+
+              <Link
+                href="/register"
+                className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-on-primary transition hover:scale-[1.02]"
+              >
+                Registrar negocio
+              </Link>
+
+            </div>
+          ) : (
+            <div className="flex items-center gap-6">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-base font-bold text-on-primary">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+
+                <div>
+
+                  <p className="text-sm font-semibold text-text">
+                    {user.name}
+                  </p>
+
+                  <p className="font-mono text-xs uppercase tracking-wide text-text-secondary">
+                    {user.role}
+                  </p>
+
+                </div>
+
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-xl border border-dashed border-border px-4 py-2 font-mono text-xs uppercase tracking-wide text-text-secondary transition hover:border-primary hover:text-primary"
+              >
+                <LogOut size={16} />
+                Salir
+              </button>
+
+            </div>
+          )}
         </div>
       </nav>
 
-      {/* Mobile Navbar */}
-      <nav className="md:hidden bg-surface border-b border-border">
-        <div className="flex items-center justify-between h-16 px-4">
-          <Link href={user ? "/dashboard" : "/"} className="no-underline">
-            <img src="/logo.svg" alt="Klikeo Logo" width={160} height={48} />
+      {/* ==========================
+            MOBILE
+      ========================== */}
+
+      <nav className="ticket-perforated-bottom sticky top-0 z-50 bg-background md:hidden">
+
+        <div className="flex h-16 items-center justify-between px-5">
+
+          <Link href={user ? "/dashboard" : "/"}>
+            <Image
+              src="/logo.svg"
+              alt="Klikeo"
+              width={145}
+              height={40}
+              priority
+            />
           </Link>
 
           <button
             onClick={() => setIsOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Abrir menú"
+            className="rounded-xl p-2 hover:bg-card"
           >
-            <svg
-              className="w-6 h-6 text-text"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            <Menu size={24} />
           </button>
+
         </div>
+
       </nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* ==========================
+            MOBILE MENU
+      ========================== */}
+
       {isOpen && (
-        <div className="fixed inset-0 z-50">
-          {/* Overlay con blur */}
+        <div className="fixed inset-0 z-100">
+
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Menú desde la izquierda */}
-          <div className="absolute left-0 top-0 h-full w-72 bg-surface shadow-2xl animate-slide-in overflow-y-auto">
-            <div className="flex items-center justify-between h-16 px-4 border-b border-border sticky top-0 bg-surface z-10">
-              <span className="text-xl font-bold text-primary">Klikeo</span>
+          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-card shadow-2xl">
+
+            <div className="flex items-center justify-between border-b border-dashed border-border p-5">
+
+              <Image
+                src="/logo.svg"
+                alt="Klikeo"
+                width={140}
+                height={38}
+              />
+
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Cerrar menú"
+                className="rounded-lg p-2 hover:bg-background"
               >
-                <svg
-                  className="w-5 h-5 text-text"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X size={22} />
               </button>
+
             </div>
 
-            <div className="py-4">
-              {/* Dashboard Links Section (for authenticated users) */}
-              {user && dashboardLinks.length > 0 && (
+            {user && (
+              <div className="border-b border-dashed border-border p-5">
+
+                <div className="flex items-center gap-3">
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-bold text-on-primary">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div>
+
+                    <p className="font-semibold text-text">
+                      {user.name}
+                    </p>
+
+                    <p className="font-mono text-xs uppercase tracking-wide text-text-secondary">
+                      {user.role}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto py-4">
+
+              {user &&
+                dashboardLinks.map((item) => {
+
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-4 px-6 py-4 text-text transition hover:bg-background"
+                    >
+                      <Icon size={20} />
+
+                      <span>{item.label}</span>
+
+                    </Link>
+                  );
+                })}
+
+              {!user && (
                 <>
-                  <div className="px-4 py-2 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Navegación
-                  </div>
-                  <div className="space-y-1">
-                    {dashboardLinks.map((link) => {
-                      const Icon = link.icon
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          onClick={() => setIsOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 text-text hover:bg-border/50 no-underline transition-colors"
-                        >
-                          <Icon size={18} />
-                          <span className="font-medium text-sm">{link.label}</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                  <div className="my-4 border-t border-border" />
+                  <Link
+                    href="/negocios"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-6 py-4 hover:bg-background"
+                  >
+                    Explorar
+                  </Link>
+
+                  <Link
+                    href="/politicas-de-privacidad"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-6 py-4 hover:bg-background"
+                  >
+                    Políticas
+                  </Link>
                 </>
               )}
 
-              {/* Regular Links */}
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="block px-4 py-3 text-text hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
-                >
-                  {link.label}
-                </Link>
-              ))}
+            </div>
 
-              {user && (
+            <div className="border-t border-dashed border-border p-5">
+
+              {user ? (
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors border-t border-border mt-4"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 transition hover:border-primary hover:text-primary"
                 >
+                  <LogOut size={18} />
                   Cerrar sesión
                 </button>
-              )}
+              ) : (
+                <div className="space-y-3">
 
-              {!user && (
-                <div className="px-4 mt-4 space-y-3">
                   <Link
                     href="/login"
+                    className="block rounded-xl border border-primary py-3 text-center text-primary"
                     onClick={() => setIsOpen(false)}
-                    className="block w-full text-center py-2.5 text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors"
                   >
                     Iniciar sesión
                   </Link>
+
                   <Link
                     href="/register"
+                    className="block rounded-xl bg-primary py-3 text-center font-semibold text-on-primary"
                     onClick={() => setIsOpen(false)}
-                    className="block w-full text-center py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                   >
                     Registrar negocio
                   </Link>
+
                 </div>
               )}
+
             </div>
-          </div>
+
+          </aside>
+
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(-100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        .animate-slide-in {
-          animation: slideIn 0.3s ease-out;
-        }
-      `}</style>
     </>
-  )
+  );
 }

@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { CheckCircle2, ImageIcon, Trash2, UploadCloud } from "lucide-react"
 import { BUSINESS_CATEGORIES } from "@/src/constants/categories"
-import Navbar from "@/src/components/Navbar"
 import { useRequireAuth } from "@/src/lib/hooks/useRequireAuth"
 import { dashboardClient, NegocioDashboard } from "@/src/lib/dashboard-client"
 
@@ -40,6 +40,11 @@ const CATEGORY_LABELS: Record<string, string> = {
   construccion: "Construcción",
   otros: "Otros",
 }
+
+const inputClass = (hasError: boolean) =>
+  `w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm text-text outline-none transition-colors focus:border-primary ${
+    hasError ? "border-danger" : "border-border"
+  }`
 
 export default function MiNegocioPage() {
   const { token, loading } = useRequireAuth()
@@ -189,282 +194,286 @@ export default function MiNegocioPage() {
   }
 
   if (loading)
-    return <div className="p-16 text-center text-muted">Cargando...</div>
+    return <div className="p-16 text-center text-text-secondary">Cargando...</div>
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto py-10 px-6">
-        <h1 className="text-2xl font-bold text-text mb-6">
-          {negocio ? "Editar mi negocio" : "Crear mi negocio"}
-        </h1>
+    <div className="mx-auto max-w-3xl animate-fade-up">
 
-        {success && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-5 text-green-700 text-sm">
-            {success}
-          </div>
-        )}
-        {errors.root && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-5 text-red-600 text-sm">
-            {errors.root.message}
-          </div>
-        )}
+      <h1 className="font-heading text-2xl font-semibold text-text sm:text-3xl">
+        {negocio ? "Editar mi negocio" : "Crear mi negocio"}
+      </h1>
+      <p className="mt-1 text-sm text-text-secondary">
+        Esta información aparece en tu página pública y la usa la IA para responder a tus clientes.
+      </p>
 
-        <div className="bg-surface border border-border rounded-xl p-8">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-5"
-          >
-            {[
-              {
-                field: "name" as const,
-                label: "Nombre del negocio *",
-                type: "text",
-              },
-              {
-                field: "slug" as const,
-                label: "Slug público (opcional)",
-                type: "text",
-              },
-              { field: "city" as const, label: "Ciudad *", type: "text" },
-              {
-                field: "whatsappNumber" as const,
-                label: "Número de WhatsApp *",
-                type: "tel",
-              },
-              {
-                field: "phone" as const,
-                label: "Teléfono (opcional)",
-                type: "tel",
-              },
-              {
-                field: "address" as const,
-                label: "Dirección (opcional)",
-                type: "text",
-              },
-            ].map(({ field, label, type }) => (
-              <div key={field}>
-                <label className="block text-sm font-medium mb-1.5 text-text">
-                  {label}
-                </label>
-                <input
-                  {...register(field)}
-                  type={type}
-                  className={`w-full px-3.5 py-2.5 border rounded-lg text-sm bg-surface text-text border-border focus:border-primary outline-none ${errors[field] ? "border-destructive" : ""}`}
-                />
-                {field === 'slug' && (
-                  <p className="text-muted text-xs mt-1">
-                    Dejar en blanco para generar el slug automáticamente desde el nombre.
-                  </p>
-                )}
-                {errors[field] && (
-                  <p className="text-destructive text-xs mt-1">
-                    {errors[field]?.message}
-                  </p>
-                )}
-              </div>
-            ))}
+      {success && (
+        <div className="mt-5 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
+          <CheckCircle2 size={16} />
+          {success}
+        </div>
+      )}
+      {errors.root && (
+        <div className="mt-5 rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
+          {errors.root.message}
+        </div>
+      )}
 
-            <div>
-              <label className="block text-sm font-medium mb-1.5 text-text">
-                Categoría *
+      <div className="mt-6 rounded-2xl border border-border bg-card p-6 sm:rounded-3xl sm:p-8">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-5"
+        >
+          {[
+            {
+              field: "name" as const,
+              label: "Nombre del negocio *",
+              type: "text",
+            },
+            {
+              field: "slug" as const,
+              label: "Slug público (opcional)",
+              type: "text",
+            },
+            { field: "city" as const, label: "Ciudad *", type: "text" },
+            {
+              field: "whatsappNumber" as const,
+              label: "Número de WhatsApp *",
+              type: "tel",
+            },
+            {
+              field: "phone" as const,
+              label: "Teléfono (opcional)",
+              type: "tel",
+            },
+            {
+              field: "address" as const,
+              label: "Dirección (opcional)",
+              type: "text",
+            },
+          ].map(({ field, label, type }) => (
+            <div key={field}>
+              <label className="mb-1.5 block text-sm font-medium text-text">
+                {label}
               </label>
-              <select
-                {...register("category")}
-                className={`w-full px-3.5 py-2.5 border rounded-lg text-sm bg-surface text-text border-border focus:border-primary outline-none ${errors.category ? "border-destructive" : ""}`}
-              >
-                <option value="">Selecciona una categoría</option>
-                {BUSINESS_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {CATEGORY_LABELS[cat] ?? cat}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1.5 text-text">
-                Descripción (opcional)
-              </label>
-              <textarea
-                {...register("description")}
-                rows={3}
-                className="w-full px-3.5 py-2.5 border rounded-lg text-sm bg-surface text-text border-border resize-y"
-                placeholder="Describe tu negocio en pocas palabras..."
+              <input
+                {...register(field)}
+                type={type}
+                className={inputClass(Boolean(errors[field]))}
               />
-              {errors.description && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.description.message}
+              {field === 'slug' && (
+                <p className="mt-1 text-xs text-text-muted">
+                  Dejar en blanco para generar el slug automáticamente desde el nombre.
+                </p>
+              )}
+              {errors[field] && (
+                <p className="mt-1 text-xs text-danger">
+                  {errors[field]?.message}
                 </p>
               )}
             </div>
+          ))}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-primary text-white border-none rounded-lg text-base font-semibold disabled:opacity-50 min-h-44px hover:bg-primary-dark transition-colors"
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-text">
+              Categoría *
+            </label>
+            <select
+              {...register("category")}
+              className={inputClass(Boolean(errors.category))}
             >
-              {isSubmitting
-                ? "Guardando..."
-                : negocio
-                  ? "Guardar cambios"
-                  : "Crear negocio"}
-            </button>
-          </form>
-        </div>
+              <option value="">Selecciona una categoría</option>
+              {BUSINESS_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {CATEGORY_LABELS[cat] ?? cat}
+                </option>
+              ))}
+            </select>
+            {errors.category && (
+              <p className="mt-1 text-xs text-danger">
+                {errors.category.message}
+              </p>
+            )}
+          </div>
 
-        <div className="bg-surface border border-border rounded-xl p-8 mt-6">
-          {negocio && (
-            <div className="mb-6 rounded-3xl border border-border bg-white p-4 shadow-sm">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Catálogo</p>
-                  <p className="mt-2 text-sm text-muted">Accede directamente al catálogo de productos de tu negocio.</p>
-                </div>
-                <Link
-                  href="/mi-negocio/productos"
-                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
-                >
-                  Ver productos
-                </Link>
-              </div>
-            </div>
-          )}
-          <h2 className="text-lg font-semibold text-text mb-4">Identidad visual</h2>
-          <p className="text-sm text-muted mb-4">
-            Sube tu logo y banner para que tu negocio se vea profesional en la página pública.
-          </p>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-text">
+              Descripción (opcional)
+            </label>
+            <textarea
+              {...register("description")}
+              rows={3}
+              className="w-full resize-y rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-text outline-none transition-colors focus:border-primary"
+              placeholder="Describe tu negocio en pocas palabras..."
+            />
+            {errors.description && (
+              <p className="mt-1 text-xs text-danger">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
 
-          {assetMessage && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-green-700 text-sm">
-              {assetMessage}
-            </div>
-          )}
-          {assetError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-red-700 text-sm">
-              {assetError}
-            </div>
-          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-1 min-h-[44px] w-full rounded-lg bg-primary py-3 text-base font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+          >
+            {isSubmitting
+              ? "Guardando..."
+              : negocio
+                ? "Guardar cambios"
+                : "Crear negocio"}
+          </button>
+        </form>
+      </div>
 
-          <div className="grid gap-5">
-            <div className="rounded-xl border border-border p-4">
-              <div className="flex items-center gap-4 mb-4 flex-wrap">
-                <div className="w-20 h-20 rounded-xl overflow-hidden bg-surface border border-border">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Vista previa del logo"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : negocio?.logoUrl ? (
-                    <img
-                      src={negocio.logoUrl}
-                      alt="Logo actual"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted text-sm">
-                      Logo
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text">Logo</p>
-                  <p className="text-sm text-muted">Preferido: 1:1, PNG o JPG.</p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <label className="block w-full sm:w-auto">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setLogoFile, setLogoPreview)}
-                    className="block w-full text-sm text-text"
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={isUploadingLogo}
-                  onClick={() => handleAssetUpload('logo')}
-                  className="py-2 px-4 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
-                >
-                  {isUploadingLogo ? 'Subiendo...' : 'Subir logo'}
-                </button>
-                {negocio?.logoUrl && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveAsset('logo')}
-                    className="py-2 px-4 bg-destructive text-white rounded-lg text-sm font-semibold"
-                  >
-                    Eliminar logo
-                  </button>
-                )}
-              </div>
-            </div>
+      <div className="mt-6 rounded-2xl border border-border bg-card p-6 sm:rounded-3xl sm:p-8">
 
-            <div className="rounded-xl border border-border p-4">
-              <div className="flex items-center gap-4 mb-4 flex-wrap">
-                <div className="w-full h-32 rounded-xl overflow-hidden bg-surface border border-border">
-                  {bannerPreview ? (
-                    <img
-                      src={bannerPreview}
-                      alt="Vista previa del banner"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : negocio?.bannerUrl ? (
-                    <img
-                      src={negocio.bannerUrl}
-                      alt="Banner actual"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted text-sm">
-                      Banner
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text">Banner</p>
-                  <p className="text-sm text-muted">Preferido: 16:9 o similar, PNG o JPG.</p>
-                </div>
+        {negocio && (
+          <div className="mb-6 rounded-2xl border border-border bg-background p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                  Catálogo
+                </p>
+                <p className="mt-2 text-sm text-text-secondary">
+                  Accede directamente al catálogo de productos de tu negocio.
+                </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <label className="block w-full sm:w-auto">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setBannerFile, setBannerPreview)}
-                    className="block w-full text-sm text-text"
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={isUploadingBanner}
-                  onClick={() => handleAssetUpload('banner')}
-                  className="py-2 px-4 bg-primary text-white rounded-lg text-sm font-semibold disabled:opacity-50"
-                >
-                  {isUploadingBanner ? 'Subiendo...' : 'Subir banner'}
-                </button>
-                {negocio?.bannerUrl && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveAsset('banner')}
-                    className="py-2 px-4 bg-destructive text-white rounded-lg text-sm font-semibold"
-                  >
-                    Eliminar banner
-                  </button>
-                )}
-              </div>
+              <Link
+                href="/mi-negocio/productos"
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5"
+              >
+                Ver productos
+              </Link>
             </div>
           </div>
-        </div>
+        )}
 
-        {fetchError && <p className="text-muted text-sm mt-4">{fetchError}</p>}
+        <h2 className="text-lg font-semibold text-text">
+          Identidad visual
+        </h2>
+        <p className="mt-1 text-sm text-text-secondary">
+          Sube tu logo y banner para que tu negocio se vea profesional en la página pública.
+        </p>
+
+        {assetMessage && (
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">
+            <CheckCircle2 size={16} />
+            {assetMessage}
+          </div>
+        )}
+        {assetError && (
+          <div className="mt-4 rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
+            {assetError}
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-5">
+
+          {/* Logo */}
+          <div className="rounded-2xl border border-border p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center gap-4">
+              <div className="h-20 w-20 overflow-hidden rounded-xl border border-border bg-background">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Vista previa del logo" className="h-full w-full object-cover" />
+                ) : negocio?.logoUrl ? (
+                  <img src={negocio.logoUrl} alt="Logo actual" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-text-muted">
+                    <ImageIcon size={22} />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-text">Logo</p>
+                <p className="text-sm text-text-secondary">Preferido: 1:1, PNG o JPG.</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label className="block w-full sm:w-auto">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setLogoFile, setLogoPreview)}
+                  className="block w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-background file:px-3 file:py-2 file:text-sm file:text-text"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={isUploadingLogo}
+                onClick={() => handleAssetUpload('logo')}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <UploadCloud size={15} />
+                {isUploadingLogo ? 'Subiendo...' : 'Subir logo'}
+              </button>
+              {negocio?.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveAsset('logo')}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm font-semibold text-danger transition hover:bg-danger/20"
+                >
+                  <Trash2 size={15} />
+                  Eliminar
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Banner */}
+          <div className="rounded-2xl border border-border p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center gap-4">
+              <div className="h-24 w-full overflow-hidden rounded-xl border border-border bg-background sm:h-28">
+                {bannerPreview ? (
+                  <img src={bannerPreview} alt="Vista previa del banner" className="h-full w-full object-cover" />
+                ) : negocio?.bannerUrl ? (
+                  <img src={negocio.bannerUrl} alt="Banner actual" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-text-muted">
+                    <ImageIcon size={22} />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-text">Banner</p>
+                <p className="text-sm text-text-secondary">Preferido: 16:9 o similar, PNG o JPG.</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label className="block w-full sm:w-auto">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleFileChange(event as ChangeEvent<HTMLInputElement>, setBannerFile, setBannerPreview)}
+                  className="block w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-background file:px-3 file:py-2 file:text-sm file:text-text"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={isUploadingBanner}
+                onClick={() => handleAssetUpload('banner')}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-background transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <UploadCloud size={15} />
+                {isUploadingBanner ? 'Subiendo...' : 'Subir banner'}
+              </button>
+              {negocio?.bannerUrl && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveAsset('banner')}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm font-semibold text-danger transition hover:bg-danger/20"
+                >
+                  <Trash2 size={15} />
+                  Eliminar
+                </button>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      {fetchError && <p className="mt-4 text-sm text-text-secondary">{fetchError}</p>}
     </div>
   )
 }

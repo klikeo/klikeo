@@ -1,247 +1,180 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import Navbar from "@/src/components/Navbar"
-import DashboardSidebar from "@/src/components/DashboardSidebar"
-import { useRequireAuth } from "@/src/lib/hooks/useRequireAuth"
+import { useEffect, useState } from "react";
+import DashboardHeader from "@/src/components/dashboard/DashboardHeader";
+import OwnerDashboard from "@/src/components/dashboard/OwnerDashboard";
+import { useRequireAuth } from "@/src/lib/hooks/useRequireAuth";
+
 import {
   dashboardClient,
   NegocioDashboard,
-  ChatSessionItem,
-} from "@/src/lib/dashboard-client"
+} from "@/src/lib/dashboard-client";
 
-const cardStyle = "bg-surface border border-border rounded-xl p-6"
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+const cardStyle = "bg-surface border border-border rounded-xl p-6";
 
 interface AdminStats {
-  totalNegocios: number
-  negociosActivos: number
-  negociosConChatbot: number
-  totalChats: number
-  chatsHoy: number
+  totalNegocios: number;
+  negociosActivos: number;
+  negociosConChatbot: number;
+  totalChats: number;
+  chatsHoy: number;
 }
 
-// Owner Dashboard Component
-function OwnerDashboard({ token }: { token: string }) {
-  const [negocio, setNegocio] = useState<NegocioDashboard | null>(null)
-  const [recentChats, setRecentChats] = useState<ChatSessionItem[]>([])
-  const [chatsHoy, setChatsHoy] = useState(0)
-  const [error, setError] = useState("")
-
-  useEffect(() => {
-    dashboardClient.negocios
-      .getByOwner(token)
-      .then(async (n) => {
-        setNegocio(n)
-        const chatResult = await dashboardClient.negocios.getChats(n.id, token)
-        setRecentChats(chatResult.data.slice(0, 5))
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const todayChats = chatResult.data.filter(
-          (c) => new Date(c.createdAt) >= today,
-        ).length
-        setChatsHoy(todayChats)
-      })
-      .catch(() => {
-        setError("No tienes un negocio registrado aún.")
-      })
-  }, [token])
-
-  if (error && !negocio) {
-    return (
-      <div className={`${cardStyle} mb-6 text-center`}>
-        <p className="text-muted mb-4">{error}</p>
-        <Link
-          href="/mi-negocio"
-          className="inline-block bg-primary text-white px-5 py-2.5 rounded-lg no-underline font-semibold hover:bg-primary-dark transition-colors"
-        >
-          Crear mi negocio
-        </Link>
-      </div>
-    )
-  }
-
-  if (!negocio) return null
-
-  return (
-    <>
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {[
-          { label: "Chats hoy", value: chatsHoy },
-          { label: "Total chats", value: recentChats.length },
-          {
-            label: "Chatbot",
-            value: negocio.trainingData ? "✅ Entrenado" : "⚠️ Sin entrenar",
-          },
-        ].map((stat) => (
-          <div key={stat.label} className={cardStyle}>
-            <p className="text-muted text-sm mb-2">{stat.label}</p>
-            <p className="text-2xl font-bold text-text m-0">{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent chats */}
-      <div className={cardStyle}>
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Conversaciones recientes
-        </h2>
-        {recentChats.length === 0 ? (
-          <p className="text-muted text-sm">Aún no hay conversaciones.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {recentChats.map((chat) => (
-              <div
-                key={chat.id}
-                className="border-b border-border pb-3 last:border-0"
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-medium text-sm">
-                    {chat.clientePhone}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {new Date(chat.updatedAt).toLocaleDateString("es-CO")}
-                  </span>
-                </div>
-                <p className="text-xs text-muted m-0">
-                  {chat.historial.length} mensaje
-                  {chat.historial.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
-  )
-}
-
-// Admin Dashboard Component
 function AdminDashboard({ token }: { token: string }) {
-  const [stats, setStats] = useState<AdminStats | null>(null)
-  const [negocios, setNegocios] = useState<NegocioDashboard[]>([])
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [negocios, setNegocios] = useState<NegocioDashboard[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch stats
         const res = await fetch(
-          "http://localhost:3001/api/negocios/admin/stats",
+          `${API_URL}/api/negocios/admin/stats`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
-          },
-        )
+          }
+        );
+
         if (res.ok) {
-          setStats(await res.json())
+          setStats(await res.json());
         }
 
-        // Fetch negocios
         const resNeg = await fetch(
-          "http://localhost:3001/api/negocios?limit=100",
+          `${API_URL}/api/negocios?limit=100`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
             credentials: "include",
-          },
-        )
+          }
+        );
+
         if (resNeg.ok) {
-          const data = await resNeg.json()
-          setNegocios(data.data || [])
+          const data = await resNeg.json();
+          setNegocios(data.data || []);
         }
-      } catch (e) {
-        console.error(e)
+      } catch (error) {
+        console.error(error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchData()
-  }, [token])
 
-  if (loading)
+    fetchData();
+  }, [token]);
+
+  if (loading) {
     return (
-      <div className="text-center text-muted py-8">
+      <div className="text-center py-10 text-text-secondary">
         Cargando estadísticas...
       </div>
-    )
+    );
+  }
 
   return (
     <>
-      {/* Admin Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-8">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5 mb-8">
         {[
-          { label: "Total Negocios", value: stats?.totalNegocios ?? 0 },
-          { label: "Negocios Activos", value: stats?.negociosActivos ?? 0 },
           {
-            label: "Chatbots Entrenados",
+            label: "Total Negocios",
+            value: stats?.totalNegocios ?? 0,
+          },
+          {
+            label: "Negocios Activos",
+            value: stats?.negociosActivos ?? 0,
+          },
+          {
+            label: "Chatbots",
             value: stats?.negociosConChatbot ?? 0,
           },
-          { label: "Total Chats", value: stats?.totalChats ?? 0 },
-          { label: "Chats Hoy", value: stats?.chatsHoy ?? 0 },
-        ].map((stat) => (
-          <div key={stat.label} className={cardStyle}>
-            <p className="text-muted text-sm mb-1">{stat.label}</p>
-            <p className="text-3xl font-bold text-text m-0">{stat.value}</p>
+          {
+            label: "Total Chats",
+            value: stats?.totalChats ?? 0,
+          },
+          {
+            label: "Chats Hoy",
+            value: stats?.chatsHoy ?? 0,
+          },
+        ].map((item) => (
+          <div key={item.label} className={cardStyle}>
+            <p className="text-sm text-text-secondary mb-2">
+              {item.label}
+            </p>
+
+            <h2 className="text-3xl font-bold">
+              {item.value}
+            </h2>
           </div>
         ))}
       </div>
 
-      {/* Recent Businesses */}
       <div className={cardStyle}>
-        <h2 className="text-lg font-semibold text-text mb-4">
-          Negocios Recientes ({negocios.length} total)
+        <h2 className="text-xl font-semibold mb-6">
+          Negocios recientes
         </h2>
-        {negocios.length === 0 ? (
-          <p className="text-muted text-sm">No hay negocios registrados.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {negocios.slice(0, 10).map((n) => (
-              <div
-                key={n.id}
-                className="border-b border-border pb-3 last:border-0 flex justify-between items-center"
-              >
-                <div>
-                  <p className="font-medium text-sm">{n.name}</p>
-                  <p className="text-xs text-muted">
-                    {n.city} · {n.category}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${n.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
-                  >
-                    {n.isActive ? "Activo" : "Inactivo"}
-                  </span>
-                </div>
+
+        <div className="space-y-4">
+          {negocios.slice(0, 10).map((n) => (
+            <div
+              key={n.id}
+              className="flex items-center justify-between border-b border-border pb-4"
+            >
+              <div>
+                <h3 className="font-semibold">
+                  {n.name}
+                </h3>
+
+                <p className="text-sm text-text-secondary">
+                  {n.city} · {n.category}
+                </p>
               </div>
-            ))}
-          </div>
-        )}
+
+              <span
+                className={`px-3 py-1 rounded-full text-xs ${
+                  n.isActive
+                    ? "bg-success/15 text-success"
+                    : "bg-border text-text-secondary"
+                }`}
+              >
+                {n.isActive ? "Activo" : "Inactivo"}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
-  )
+  );
 }
 
 export default function DashboardPage() {
-  const { user, token, loading } = useRequireAuth()
+  const { user, token, loading } = useRequireAuth();
 
-  if (loading)
-    return <div className="py-16 text-center text-muted">Cargando...</div>
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        Cargando...
+      </div>
+    );
+  }
 
-  const isAdmin = user?.role === "admin"
+  const isAdmin = user?.role === "admin";
 
   return (
-    <main className="flex-1 py-10 px-6 overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-text mb-1">
-          {isAdmin ? "Panel de Administración" : "Dashboard"}
-        </h1>
-        {user && (
-          <p className="text-muted mb-8">
-            Bienvenido, {user.name} {isAdmin && "👑"}
-          </p>
-        )}
+    <main className="flex-1 py-10 px-6">
+      <div className="max-w-7xl mx-auto">
+        <DashboardHeader
+          title={isAdmin ? "Panel de Administración" : "Dashboard"}
+          subtitle={
+            user
+              ? `Bienvenido nuevamente, ${user.name}${isAdmin ? " 👑" : ""}`
+              : ""
+          }
+        />
 
         {isAdmin ? (
           <AdminDashboard token={token!} />
@@ -250,5 +183,5 @@ export default function DashboardPage() {
         )}
       </div>
     </main>
-  )
+  );
 }

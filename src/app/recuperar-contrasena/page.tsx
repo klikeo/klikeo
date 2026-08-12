@@ -130,7 +130,7 @@ export default function RecuperarContrasenaPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="mt-1 min-h-[44px] w-full rounded-lg bg-primary py-3 text-base font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                      className="mt-1 min-h-11 w-full rounded-lg bg-primary py-3 text-base font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       {isSubmitting ? "Enviando..." : "Enviar link"}
                     </button>

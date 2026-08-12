@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/src/lib/auth-context";
 
@@ -22,12 +23,19 @@ import {
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    setIsOpen(false);
+    try {
+      await logout();
+      router.push("/login");
+    } catch {
+      router.push("/login");
+    } finally {
+      setIsOpen(false);
+    }
   };
 
   const userRole = user?.role === "admin" ? "admin" : "owner";

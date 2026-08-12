@@ -13,6 +13,8 @@ export interface NegocioPublic {
   whatsappNumber: string
   logoUrl?: string
   bannerUrl?: string
+  theme?: 'clasica' | 'compacta' | 'revista'
+  primaryColor?: string
   isActive: boolean
   createdAt: string
   updatedAt: string

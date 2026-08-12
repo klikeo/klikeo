@@ -41,7 +41,7 @@ export default async function NegocioDetailPage({ params }: NegocioPageProps) {
         {/* Banner + Logo superpuesto */}
         <div style={{ position: "relative", marginBottom: "56px" }}>
           <div
-            className="max-h-[154px] sm:max-h-none"
+            className="max-h-38.5 sm:max-h-none"
             style={{
               width: "100%",
               height: "220px",

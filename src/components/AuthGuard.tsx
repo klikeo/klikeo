@@ -2,27 +2,32 @@
 
 import { useEffect } from 'react'
 import { useAuth } from '@/src/lib/auth-context'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 interface AuthGuardProps {
   children: React.ReactNode
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-  const { user, accessToken } = useAuth()
+  const { user, accessToken, loading } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    // Solo redirigir si tenemos token pero no usuario (cargando)
-    // o si ya tenemos usuario (ya logueado)
-    if (accessToken && user) {
+    if (loading) return
+
+    const authPages = ['/', '/login', '/register']
+    if (user && accessToken && authPages.includes(pathname)) {
       router.replace('/dashboard')
     }
-  }, [user, accessToken, router])
+  }, [user, accessToken, loading, pathname, router])
 
-  // Si está logueado, no renderizamos nada (el useEffect se encarga de redirigir)
-  if (user && accessToken) {
+  if (loading) {
     return null
+  }
+
+  if (user && accessToken) {
+    return pathname === '/' || pathname === '/login' || pathname === '/register' ? null : <>{children}</>
   }
 
   return <>{children}</>

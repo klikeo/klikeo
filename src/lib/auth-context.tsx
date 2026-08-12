@@ -47,10 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    let active = true
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active) return
       setSession(session)
       if (session?.user) {
-        loadProfile(session.user.id, session.user.email!)
+        void loadProfile(session.user.id, session.user.email ?? '')
+      } else {
+        setUser(null)
       }
       setLoading(false)
     })
@@ -58,15 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
       setSession(session)
       if (session?.user) {
-        loadProfile(session.user.id, session.user.email!)
+        void loadProfile(session.user.id, session.user.email ?? '')
       } else {
         setUser(null)
       }
+      setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -85,7 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function logout() {
-    await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut()
+    if (error) throw new Error(error.message)
     setUser(null)
     setSession(null)
   }

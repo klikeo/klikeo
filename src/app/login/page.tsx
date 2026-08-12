@@ -5,7 +5,7 @@ import { useAuth } from "@/src/lib/auth-context"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -20,6 +20,7 @@ type LoginForm = z.infer<typeof loginSchema>
 function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
 
   const {
@@ -32,7 +33,10 @@ function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data.email, data.password)
-      router.push("/dashboard")
+
+      const redirect = searchParams.get("redirect")
+      const safeRedirect = redirect && redirect.startsWith("/") ? redirect : "/dashboard"
+      router.replace(safeRedirect)
     } catch (err) {
       setError("root", {
         message: err instanceof Error ? err.message : "Error al iniciar sesión",
@@ -132,7 +136,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-1 min-h-[44px] w-full rounded-lg bg-primary py-3 text-base font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                className="mt-1 min-h-11 w-full rounded-lg bg-primary py-3 text-base font-semibold text-background transition-all hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>
